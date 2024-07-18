@@ -33,9 +33,15 @@ export async function POST(request: Request) {
                 content: 
                 `You will assist in helping clients with their car needs. 
                 With this inventory data: ${JSON.stringify(inventoryData)}, return the following:
-                - 3 recommendations
-                - Part Number for the recommendations
-                - Cost of the recommendations`},
+                3 recommendations with:
+                - Part Number
+                - Cost
+                - Location
+                - Shopmonkey ID
+                - Vendor
+                - Retail Price
+                - In Stock
+                `},
             ...messages,
         ]
     });
