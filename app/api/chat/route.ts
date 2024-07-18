@@ -16,8 +16,11 @@ export async function POST(request: Request) {
 
     console.log(messages);
 
+    // Finds URL
+    const baseURL = request.headers.get('origin') || "http://localhost:3000"
+
     // Fetch the JSON data from the /api/inventory endpoint
-    const inventoryResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/inventory`);
+    const inventoryResponse = await fetch(`${baseURL}/api/inventory`);
     if (!inventoryResponse.ok) {
         return new Response(JSON.stringify({ error: 'Error fetching inventory data' }), { status: 500 });
     }

@@ -143,9 +143,15 @@ const Search: React.FC = () => {
         />
 
         <div className="my-6 flex flex-wrap gap-2 justify-center">
-          <button className="rounded-md bg-black p-2 mt-2 text-white">
+          {/* <button className="rounded-md bg-black p-2 mt-2 text-white">
             Send Message
-          </button>
+          </button> */}
+
+          <Button
+            type="submit"
+            title="Search"
+            variant="btn_dark_green"
+          />
           
           <Button
             type="button"
@@ -159,7 +165,7 @@ const Search: React.FC = () => {
       
       {/* <div className="my-6 flex flex-wrap gap-2 justify-center">
         <Button
-          type="button"
+          type="submit"
           title="Search"
           variant="btn_dark_green"
         />
