@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     console.log(messages);
 
     // Use environment variable or default to localhost for base URL
-    const baseURL = process.env.BASE_URL;
+    const baseURL = process.env.BASE_URL || "http://localhost:3000";
 
     // Fetch the JSON data from the /api/inventory endpoint
     const inventoryResponse = await fetch(`${baseURL}/api/inventory`);
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
         return new Response(JSON.stringify({ error: 'Error fetching inventory data' }), { status: 500 });
     }
     const inventoryData = await inventoryResponse.json();
-    console.log('Inventory Data:', inventoryData);
+    //console.log('Inventory Data:', inventoryData);
 
     // Getting response from GPT
     const response = await openai.createChatCompletion({
@@ -37,8 +37,9 @@ export async function POST(request: Request) {
                 content: 
                 `You will assist in helping clients with their car needs. 
                 With this inventory data: ${JSON.stringify(inventoryData)}, return the following:
-                3 recommendations with:
+                What the users prompt and 3 recommendations with:
                 - Part Number
+                - Which cars it supports
                 - Cost
                 - Location
                 - Shopmonkey ID
