@@ -74,6 +74,7 @@ const Search: React.FC = () => {
   return (
     <section className="2xl:max-container items-center relative flex flex-col py-2 lg:mb-5 lg:py-4 xl:mb-10">
       <div className="flex flex-wrap justify-between w-full">
+
         <Box
           component="form"
           sx={{ '& .MuiTextField-root': { m: 1, width: '15ch' } }}
@@ -133,8 +134,13 @@ const Search: React.FC = () => {
         </Box>
       </div>
 
-      <form className="mt-12 flex flex-col items-center" onSubmit={handleSubmit}>
+{/* 
+  July 19th TO DO LIST: 
+  - Look into storing the Car Parts into a variable to call to OpenAI API
+  - Look into {handleInputChange} for the different text inputs. Make sure all 4 inputs are seperate inputs and can be sent to the OpenAI API alongside with the Car Parts
+*/}
 
+      <form className="mt-12 flex flex-col items-center" onSubmit={handleSubmit}>
         <textarea 
           className="mt-2 w-full bg-white p-2 rounded-md text-black border border-gray-300 focus:border-gray-700 focus:outline-none" 
           placeholder="Message VeerAI"
@@ -160,22 +166,8 @@ const Search: React.FC = () => {
             onClick={handleClear}
           />
         </div>
-
       </form>
       
-      {/* <div className="my-6 flex flex-wrap gap-2 justify-center">
-        <Button
-          type="submit"
-          title="Search"
-          variant="btn_dark_green"
-        />
-        <Button
-          type="button"
-          title="Clear"
-          variant="btn_dark_green"
-          onClick={handleClear}
-        />
-      </div> */}
 
       {/* Oil Change Price and Details for 2019 Mercedes C300 4Matic 2.0L */}
       {messages.map((message : Message) => {

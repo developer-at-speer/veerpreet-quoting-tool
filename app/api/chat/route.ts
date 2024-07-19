@@ -16,8 +16,8 @@ export async function POST(request: Request) {
 
     console.log(messages);
 
-    // Finds URL
-    const baseURL = request.headers.get('origin') || "http://localhost:3000"
+    // Use environment variable or default to localhost for base URL
+    const baseURL = process.env.BASE_URL;
 
     // Fetch the JSON data from the /api/inventory endpoint
     const inventoryResponse = await fetch(`${baseURL}/api/inventory`);
@@ -32,7 +32,8 @@ export async function POST(request: Request) {
         model: 'gpt-4',
         stream: true,
         messages: [
-            { role: "system", 
+            { 
+                role: "system", 
                 content: 
                 `You will assist in helping clients with their car needs. 
                 With this inventory data: ${JSON.stringify(inventoryData)}, return the following:
@@ -44,7 +45,8 @@ export async function POST(request: Request) {
                 - Vendor
                 - Retail Price
                 - In Stock
-                `},
+                `
+            },
             ...messages,
         ]
     });
