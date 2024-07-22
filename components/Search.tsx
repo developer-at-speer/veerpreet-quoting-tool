@@ -4,35 +4,29 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from './Button';
 import Button2 from '@mui/material/Button';
-import {useChat, Message} from "ai/react";
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import { useChat, Message } from "ai/react";
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const Search: React.FC = () => {
-
-  // Holds the input of the user prompts
   const [part, setPart] = React.useState<string>('');
   const [carMake, setCarMake] = React.useState<string>('');
   const [model, setModel] = React.useState<string>('');
   const [year, setYear] = React.useState<string>('');
   const [engineSize, setEngineSize] = React.useState<string>('');
-
-  // Selects car part
   const [selectedButton, setSelectedButton] = React.useState<string | null>(null);
-
-  // Tracks if a message has been sent
   const [hasSubmitted, setHasSubmitted] = React.useState<boolean>(false);
-
-  // Hook used to manage Chat
-  const {input, handleInputChange, handleSubmit, isLoading, messages} = useChat();
-
-  // Reference to the end of the messages container for scrolling
+  const { input, handleInputChange, handleSubmit, isLoading, messages, setInput } = useChat({
+    // initialInput: `${year} ${carMake} ${model} ${engineSize}`
+  });
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const isSmallScreen = useMediaQuery('(max-width:1375px)');
 
-  // Handles the state when a button is selected
   const handleButtonClick = (buttonLabel: string) => {
     setSelectedButton(buttonLabel);
   };
 
-  // Initializing the different car part buttons
   const buttons = [
     { label: "Oil Change", group: 1 },
     { label: "Tire Change", group: 1 },
@@ -48,7 +42,6 @@ const Search: React.FC = () => {
     { label: "A/C Refill", group: 3 },
   ];
 
-  // Renders the button (Look more into this function)
   const renderButtons = (group: number) => {
     return buttons
       .filter(button => button.group === group)
@@ -73,109 +66,147 @@ const Search: React.FC = () => {
       ));
   };
 
-  // Scrolls to the bottom of the messages container
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  // The effect for scrolling whenever "messages" or "hasSubmitted" changes
   React.useEffect(() => {
     if (hasSubmitted) {
       scrollToBottom();
     }
   }, [messages, hasSubmitted]);
 
-  // Form Submit handler, calls handleSubmit. Sends users prompt to backend using handleSumbit.
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setHasSubmitted(true);
-    handleSubmit(e);
+  // const handleFormSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const messageContent = `
+  //     Car Make: ${carMake}
+  //     Model: ${model}
+  //     Year: ${year}
+  //     Engine Size: ${engineSize}
+  //   `;
+  //   setInput(messageContent); 
+  //   setHasSubmitted(true);
+  //   try {
+  //     await handleSubmit(); 
+  //   } catch (error) {
+  //     console.error("Error submitting form:", error);
+  //   }
+  // };
+
+  const handleLogInputs = () => {
+    console.log(`${year} ${carMake} ${model} ${engineSize}`);
   };
 
-  // JSX Structure 
   return (
     <div className="min-h-[100vh] flex flex-col">
       <section className="flex-grow items-center relative flex flex-col py-2 lg:mb-5 lg:py-4 xl:mb-10">
-        <div className="flex flex-wrap justify-between w-full">
-
-        {/* Handling the text field for the users inputs */}
-          <Box
-            component="form"
-            sx={{ '& .MuiTextField-root': { m: 1, width: '15ch' } }}
-            noValidate
-            autoComplete="off"
-          >
-            <div>
-              <TextField
-                required
-                helperText="Enter the Car Make"
-                id="outlined-required"
-                label="Car Make"
-                value={carMake}
-                onChange={(e) => setCarMake(e.target.value)}
-                size="small"
-              />
-              <TextField
-                required
-                helperText="Model of Car"
-                id="outlined-required"
-                label="Model"
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                size="small"
-              />
-              <TextField
-                required
-                helperText="Year of Car"
-                id="outlined-required"
-                label="Year"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                size="small"
-              />
-              <TextField
-                helperText="(Optional)"
-                id="outlined-basic"
-                label="Engine Size"
-                variant="outlined"
-                value={engineSize}
-                onChange={(e) => setEngineSize(e.target.value)}
-                size="small"
-              />
-
-              <div className="my-6 flex flex-wrap gap-2 justify-center">
-                <Button
-                  type="submit"
-                  title="Search"
-                  variant="btn_dark_green"
+        <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleSubmit}>
+          <div className="flex flex-wrap justify-between w-full">
+            <Box
+              sx={{ '& .MuiTextField-root': { m: 1, width: '15ch' } }}
+              noValidate
+              autoComplete="off"
+              onSubmit={handleSubmit}
+            >
+              <div>
+                <TextField
+                  required
+                  helperText="Enter the Car Make"
+                  id="outlined-required"
+                  label="Car Make"
+                  value={carMake}
+                  onChange={(e) => setCarMake(e.target.value)}
+                  size="small"
                 />
-
-                <Button
-                  type="button"
-                  title="Clear"
-                  variant="btn_dark_green"
+                <TextField
+                  required
+                  helperText="Model of Car"
+                  id="outlined-required"
+                  label="Model"
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                  size="small"
+                />
+                <TextField
+                  required
+                  helperText="Year of Car"
+                  id="outlined-required"
+                  label="Year"
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  size="small"
+                />
+                <TextField
+                  helperText="(Optional)"
+                  id="outlined-basic"
+                  label="Engine Size"
+                  variant="outlined"
+                  value={engineSize}
+                  onChange={(e) => setEngineSize(e.target.value)}
+                  size="small"
                 />
               </div>
+            </Box>
 
+            {isSmallScreen ? (
+              <Box sx={{ m: 1, width: '100%', display: 'flex', justifyContent: 'center' }}>
+                <Select
+                  sx={{ width: '250px' }} 
+                  fullWidth
+                  value={selectedButton || ''}
+                  onChange={(e) => setSelectedButton(e.target.value)}
+                  displayEmpty
+                >
+                  <MenuItem value="" disabled>
+                    Select a Car Part
+                  </MenuItem>
+                  {buttons.map((button, index) => (
+                    <MenuItem key={index} value={button.label}>
+                      {button.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', '& button': { m: 1 } }}>
+                <Box sx={{ display: 'flex' }}>
+                  {renderButtons(1)}
+                </Box>
+                <Box sx={{ display: 'flex' }}>
+                  {renderButtons(2)}
+                </Box>
+                <Box sx={{ display: 'flex' }}>
+                  {renderButtons(3)}
+                </Box>
+              </Box>
+            )}
+          </div>
+
+          <div className="my-6 flex flex-wrap gap-2 justify-center">
+            <Button
+              type="submit"
+              title="Search"
+              variant="btn_dark_green"
+              onClick={handleLogInputs}
+            />
+
+            <Button
+              type="button"
+              title="Clear"
+              variant="btn_dark_green"
+              onClick={() => {
+                setCarMake('');
+                setModel('');
+                setYear('');
+                setEngineSize('');
+                setSelectedButton(null);
+              }}
+            />
             </div>
-          </Box>
+        </form>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', '& button': { m: 1 } }}>
-            <Box sx={{ display: 'flex' }}>
-              {renderButtons(1)}
-            </Box>
-            <Box sx={{ display: 'flex' }}>
-              {renderButtons(2)}
-            </Box>
-            <Box sx={{ display: 'flex' }}>
-              {renderButtons(3)}
-            </Box>
-          </Box>
-        </div>
-
-        {/* Displays and handles all the messaging. The messages are fetched from the backend and updated in real-time as the conversation progresses using useChat hook*/}
         <div className="mt-12 flex flex-col items-center w-full max-h-[600px] overflow-y-auto">
           {messages.map((message: Message) => {
             const isAssistant = message.role === "assistant";
@@ -198,10 +229,9 @@ const Search: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Calls the backend to submit the users prompt */}
-        <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleFormSubmit}>
-          <textarea 
-            className="mt-2 w-full bg-white p-2 rounded-md text-black border border-gray-300 focus:border-gray-700 focus:outline-none" 
+        <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleSubmit}>
+          <textarea
+            className="mt-2 w-full bg-white p-2 rounded-md text-black border border-gray-300 focus:border-gray-700 focus:outline-none"
             placeholder="Message VeerAI"
             value={input}
             onChange={handleInputChange}

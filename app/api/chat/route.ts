@@ -14,7 +14,8 @@ const prompt = "You will assist in helping clients with their car needs. You wil
 export async function POST(request: Request) {
     const { messages } = await request.json();
 
-    console.log(messages);
+    // Log the received messages to check what the API is getting
+    console.log('Received messages:', messages);
 
     // Use environment variable or default to localhost for base URL
     const baseURL = process.env.BASE_URL || "http://localhost:3000";
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
         return new Response(JSON.stringify({ error: 'Error fetching inventory data' }), { status: 500 });
     }
     const inventoryData = await inventoryResponse.json();
-    //console.log('Inventory Data:', inventoryData);
+    //console.log('Inventory Data:', inventoryData);  // Log the inventory data to verify
 
     // Getting response from GPT
     const response = await openai.createChatCompletion({
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
             { 
                 role: "system", 
                 content: 
-                `You will assist in helping clients with their car needs. 
+                `You will assist in helping clients with their car needs.
                 With this inventory data: ${JSON.stringify(inventoryData)}, return the following:
                 What the users prompt and 3 recommendations with:
                 - Part Number
