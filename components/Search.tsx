@@ -78,22 +78,22 @@ const Search: React.FC = () => {
     }
   }, [messages, hasSubmitted]);
 
-  // const handleFormSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   const messageContent = `
-  //     Car Make: ${carMake}
-  //     Model: ${model}
-  //     Year: ${year}
-  //     Engine Size: ${engineSize}
-  //   `;
-  //   setInput(messageContent); 
-  //   setHasSubmitted(true);
-  //   try {
-  //     await handleSubmit(); 
-  //   } catch (error) {
-  //     console.error("Error submitting form:", error);
-  //   }
-  // };
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const messageContent = `
+      Car Make: ${carMake}
+      Model: ${model}
+      Year: ${year}
+      Engine Size: ${engineSize}
+    `;
+    setInput(messageContent); 
+    setHasSubmitted(true);
+    try {
+      await handleSubmit(); 
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+  };
 
   const handleLogInputs = () => {
     console.log(`${year} ${carMake} ${model} ${engineSize}`);
@@ -102,7 +102,7 @@ const Search: React.FC = () => {
   return (
     <div className="min-h-[100vh] flex flex-col">
       <section className="flex-grow items-center relative flex flex-col py-2 lg:mb-5 lg:py-4 xl:mb-10">
-        <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleSubmit}>
+        <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleFormSubmit}>
           <div className="flex flex-wrap justify-between w-full">
             <Box
               sx={{ '& .MuiTextField-root': { m: 1, width: '15ch' } }}
@@ -229,7 +229,7 @@ const Search: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleSubmit}>
+        <form className="mt-4 flex flex-col items-center w-full" onSubmit= {handleFormSubmit}>
           <textarea
             className="mt-2 w-full bg-white p-2 rounded-md text-black border border-gray-300 focus:border-gray-700 focus:outline-none"
             placeholder="Message VeerAI"
