@@ -1,4 +1,3 @@
-// app/api/chat/route.ts
 import { Configuration, OpenAIApi } from "openai-edge";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 
@@ -9,26 +8,20 @@ const config = new Configuration({
 });
 const openai = new OpenAIApi(config);
 
-const prompt = "You will assist in helping clients with their car needs. You will output: Three Approximate Costs.";
-
 export async function POST(request: Request) {
-    const { messages } = await request.json();
+    const { messages, carDetails } = await request.json();
 
-    // Log the received messages to check what the API is getting
     console.log('Received messages:', messages);
+    console.log('Car details:', carDetails);
 
-    // Use environment variable or default to localhost for base URL
     const baseURL = process.env.BASE_URL || "http://localhost:3000";
 
-    // Fetch the JSON data from the /api/inventory endpoint
     const inventoryResponse = await fetch(`${baseURL}/api/inventory`);
     if (!inventoryResponse.ok) {
         return new Response(JSON.stringify({ error: 'Error fetching inventory data' }), { status: 500 });
     }
     const inventoryData = await inventoryResponse.json();
-    //console.log('Inventory Data:', inventoryData);  // Log the inventory data to verify
 
-    // Getting response from GPT
     const response = await openai.createChatCompletion({
         model: 'gpt-4',
         stream: true,
@@ -47,15 +40,13 @@ export async function POST(request: Request) {
                 - Vendor
                 - Retail Price
                 - In Stock
-                `
+                Car details: ${carDetails}`
             },
             ...messages,
         ]
     });
 
-    // Stream data to FE
     const stream = await OpenAIStream(response);
 
-    // Send stream as response to client
     return new StreamingTextResponse(stream);
 }
