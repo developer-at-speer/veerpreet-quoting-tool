@@ -111,13 +111,13 @@ const Search: React.FC = () => {
               <div>
                 <TextField
                   required
-                  helperText="Enter the Car Make"
+                  helperText="Car Make"
                   id="outlined-required"
                   label="Car Make"
                   value={carMake}
                   onChange={(e) => setCarMake(e.target.value)}
                   size="small"
-                  style={{ margin: '1rem', width: '13.9ch' }}
+                  style={{ margin: '1rem', width: '13ch' }}
                 />
                 <TextField
                   required
@@ -127,7 +127,7 @@ const Search: React.FC = () => {
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                   size="small"
-                  style={{ margin: '1rem', width: '13.9ch' }}
+                  style={{ margin: '1rem', width: '13ch' }}
                 />
                 <TextField
                   required
@@ -137,7 +137,7 @@ const Search: React.FC = () => {
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
                   size="small"
-                  style={{ margin: '1rem', width: '13.9ch' }}
+                  style={{ margin: '1rem', width: '13ch' }}
                 />
                 <TextField
                   helperText="(Optional)"
@@ -147,7 +147,7 @@ const Search: React.FC = () => {
                   value={engineSize}
                   onChange={(e) => setEngineSize(e.target.value)}
                   size="small"
-                  style={{ margin: '1rem', width: '13.9ch' }}
+                  style={{ margin: '1rem', width: '13ch' }}
                 />
               </div>
             </div>
