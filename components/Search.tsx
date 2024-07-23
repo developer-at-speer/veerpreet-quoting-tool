@@ -104,7 +104,7 @@ const Search: React.FC = () => {
     <div className="min-h-[100vh] flex flex-col">
       <section className="flex-grow items-center relative flex flex-col py-2 lg:mb-5 lg:py-4 xl:mb-10">
         <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleFormSubmit}>
-          <div className="flex flex-wrap justify-between w-full">
+          <div className="flex flex-wrap  w-full">
             <div
                 style={{ display: 'flex', flexDirection: 'column', margin: '1rem' }}
               >
@@ -117,7 +117,7 @@ const Search: React.FC = () => {
                   value={carMake}
                   onChange={(e) => setCarMake(e.target.value)}
                   size="small"
-                  style={{ margin: '1rem', width: '13ch' }}
+                  style={{ margin: '0.5rem', width: '13ch' }}
                 />
                 <TextField
                   required
@@ -127,7 +127,7 @@ const Search: React.FC = () => {
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                   size="small"
-                  style={{ margin: '1rem', width: '13ch' }}
+                  style={{ margin: '0.5rem', width: '13ch' }}
                 />
                 <TextField
                   required
@@ -137,7 +137,7 @@ const Search: React.FC = () => {
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
                   size="small"
-                  style={{ margin: '1rem', width: '13ch' }}
+                  style={{ margin: '0.5rem', width: '13ch' }}
                 />
                 <TextField
                   helperText="(Optional)"
@@ -147,8 +147,28 @@ const Search: React.FC = () => {
                   value={engineSize}
                   onChange={(e) => setEngineSize(e.target.value)}
                   size="small"
-                  style={{ margin: '1rem', width: '13ch' }}
+                  style={{ margin: '0.5rem', width: '13ch' }}
                 />
+              </div>
+                <div className=" flex flex-wrap gap-3 justify-center">
+                  <Button
+                    type="submit"
+                    title="Search"
+                    variant="btn_dark_green"
+                    onClick={handleLogInputs}
+                  />
+                  <Button
+                    type="button"
+                    title="Clear"
+                    variant="btn_dark_green"
+                    onClick={() => {
+                      setCarMake('');
+                      setModel('');
+                      setYear('');
+                      setEngineSize('');
+                      setSelectedButton(null);
+                    }}
+                  />
               </div>
             </div>
 
@@ -185,31 +205,9 @@ const Search: React.FC = () => {
               </Box>
             )}
           </div>
-
-          <div className="my-6 flex flex-wrap gap-2 justify-center">
-            <Button
-              type="submit"
-              title="Search"
-              variant="btn_dark_green"
-              onClick={handleLogInputs}
-            />
-
-            <Button
-              type="button"
-              title="Clear"
-              variant="btn_dark_green"
-              onClick={() => {
-                setCarMake('');
-                setModel('');
-                setYear('');
-                setEngineSize('');
-                setSelectedButton(null);
-              }}
-            />
-            </div>
         </form>
 
-        <div className="mt-12 flex flex-col items-center w-full max-h-[600px] overflow-y-auto">
+        <div className="mt-4 flex flex-col items-center w-full max-h-[400px] overflow-y-auto">
           {messages.map((message: Message) => {
             const isAssistant = message.role === "assistant";
 
