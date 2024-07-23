@@ -10,23 +10,22 @@ import { useChat, Message } from "ai/react";
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 const Search: React.FC = () => {
-  const [part, setPart] = React.useState<string>('');
   const [carMake, setCarMake] = React.useState<string>('');
   const [model, setModel] = React.useState<string>('');
   const [year, setYear] = React.useState<string>('');
   const [engineSize, setEngineSize] = React.useState<string>('');
   const [selectedButton, setSelectedButton] = React.useState<string | null>(null);
   const [hasSubmitted, setHasSubmitted] = React.useState<boolean>(false);
-  const { input, handleInputChange, handleSubmit, isLoading, messages, setInput } = useChat({
-    // initialInput: `${year} ${carMake} ${model} ${engineSize}`
-  });
+  const { input, handleInputChange, handleSubmit, isLoading, messages, setInput } = useChat();
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const isSmallScreen = useMediaQuery('(max-width:1375px)');
 
+  // Selects Car Part
   const handleButtonClick = (buttonLabel: string) => {
     setSelectedButton(buttonLabel);
   };
 
+  // Car Part Buttons
   const buttons = [
     { label: "Oil Change", group: 1 },
     { label: "Tire Change", group: 1 },
@@ -66,18 +65,19 @@ const Search: React.FC = () => {
       ));
   };
 
+  // Annimations when new messages are sent and recieved
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
-
   React.useEffect(() => {
     if (hasSubmitted) {
       scrollToBottom();
     }
   }, [messages, hasSubmitted]);
 
+  // Function to handle sending car inputs to backend
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const messageContent = `
@@ -95,6 +95,7 @@ const Search: React.FC = () => {
     }
   };
 
+  // Function to log car inputs
   const handleLogInputs = () => {
     console.log(`${year} ${carMake} ${model} ${engineSize}`);
   };
@@ -104,12 +105,9 @@ const Search: React.FC = () => {
       <section className="flex-grow items-center relative flex flex-col py-2 lg:mb-5 lg:py-4 xl:mb-10">
         <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleFormSubmit}>
           <div className="flex flex-wrap justify-between w-full">
-            <Box
-              sx={{ '& .MuiTextField-root': { m: 1, width: '15ch' } }}
-              noValidate
-              autoComplete="off"
-              onSubmit={handleSubmit}
-            >
+            <div
+                style={{ display: 'flex', flexDirection: 'column', margin: '1rem' }}
+              >
               <div>
                 <TextField
                   required
@@ -119,6 +117,7 @@ const Search: React.FC = () => {
                   value={carMake}
                   onChange={(e) => setCarMake(e.target.value)}
                   size="small"
+                  style={{ margin: '1rem', width: '13.9ch' }}
                 />
                 <TextField
                   required
@@ -128,6 +127,7 @@ const Search: React.FC = () => {
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                   size="small"
+                  style={{ margin: '1rem', width: '13.9ch' }}
                 />
                 <TextField
                   required
@@ -137,6 +137,7 @@ const Search: React.FC = () => {
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
                   size="small"
+                  style={{ margin: '1rem', width: '13.9ch' }}
                 />
                 <TextField
                   helperText="(Optional)"
@@ -146,9 +147,10 @@ const Search: React.FC = () => {
                   value={engineSize}
                   onChange={(e) => setEngineSize(e.target.value)}
                   size="small"
+                  style={{ margin: '1rem', width: '13.9ch' }}
                 />
               </div>
-            </Box>
+            </div>
 
             {isSmallScreen ? (
               <Box sx={{ m: 1, width: '100%', display: 'flex', justifyContent: 'center' }}>
