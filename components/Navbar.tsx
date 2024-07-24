@@ -1,11 +1,11 @@
-import React from 'react'
+import React from 'react';
 
 const Navbar = () => {
   return (
-    <nav className="border-2 flexBetween max-container padding-container relative z-30 py-5">
+    <nav className="border-2 flex justify-between items-center w-full px-8 py-5 bg-white">
       <h1 className="text-2xl font-bold">Veerpreet Quoting Tool</h1>
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

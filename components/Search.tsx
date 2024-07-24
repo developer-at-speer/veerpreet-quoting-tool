@@ -8,6 +8,13 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { useChat, Message } from "ai/react";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import Image from "next/image";  
+import search from "../public/arrow.svg";
+import smallsearch from "../public/small-search.svg";
+import cancel from "../public/cancel.svg";
+import IconButton from "@mui/material/IconButton";
+import { styled } from '@mui/material/styles';
+import toast, { Toaster } from "react-hot-toast"; 
 
 const Search: React.FC = () => {
   const [carMake, setCarMake] = React.useState<string>("");
@@ -15,14 +22,13 @@ const Search: React.FC = () => {
   const [year, setYear] = React.useState<string>("");
   const [engineSize, setEngineSize] = React.useState<string>("");
   const [selectedButton, setSelectedButton] = React.useState<string | null>(null);
-  const [hasSubmitted, setHasSubmitted] = React.useState<boolean>(false);
   const [shouldSubmit, setShouldSubmit] = React.useState<boolean>(false);
-  const { input, handleInputChange, handleSubmit, isLoading, messages, setInput } = useChat();
+  const { input, handleInputChange, handleSubmit, messages, setInput } = useChat();
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const isSmallScreen = useMediaQuery("(max-width:1375px)");
 
   // Variable for car details
-  const carDetails = `${year} ${carMake} ${model} ${engineSize}`;
+  const carDetails = `${selectedButton} for ${year} ${carMake} ${model} ${engineSize}`;
 
   // Handling car part buttons
   const handleButtonClick = (buttonLabel: string) => {
@@ -43,6 +49,12 @@ const Search: React.FC = () => {
     { label: "New Tire", group: 3 },
     { label: "A/C Refill", group: 3 },
   ];
+
+  // Custom style button
+  const SmallIconButton = styled(IconButton)({
+    fontSize: '1rem', // Adjust the font size here
+    padding: '0.5rem',   // Optionally adjust padding
+  });
 
   // Renders car parts buttons
   const renderButtons = (group: number) => {
@@ -69,24 +81,21 @@ const Search: React.FC = () => {
       ));
   };
 
-  // Annimations for the chat messages
+  // Scroll to bottom
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
+
   React.useEffect(() => {
-    if (hasSubmitted) {
-      scrollToBottom();
-    }
-  }, [messages, hasSubmitted]);
+    scrollToBottom();
+  }, [messages]);
 
   // Handles submitting car details to backend from car text input box
   React.useEffect(() => {
     const submitForm = async () => {
       if (shouldSubmit) {
-        setHasSubmitted(true);
-
         // Perform the additional POST request to the backend
         const response = await fetch("/api/chat", {
           method: "POST",
@@ -108,13 +117,27 @@ const Search: React.FC = () => {
   const handleFormSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
+    if (!selectedButton) {
+      toast.error("Select a Car Part");
+      return;
+    }
+
     // Update the input state with car details and set flag to submit form
     setInput(`${carDetails}`);
     setShouldSubmit(true);
   };
 
+  // Submits inputs when Enter key is pressed
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleSubmit(new Event("submit"));
+    }
+  };
+
   return (
     <div className="min-h-[100vh] flex flex-col">
+      <Toaster />
       <section className="flex-grow items-center relative flex flex-col py-2 lg:mb-5 lg:py-4 xl:mb-10">
         <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleFormSubmit}>
           <div className="flex flex-wrap w-full">
@@ -161,7 +184,7 @@ const Search: React.FC = () => {
                   style={{ margin: "0.5rem", width: "13ch" }}
                 />
               </div>
-              <div className="flex flex-wrap gap-3 justify-center">
+              {/* <div className="flex flex-wrap gap-3 justify-center">
                 <Button type="submit" title="Search" variant="btn_dark_green" />
                 <Button
                   type="button"
@@ -175,7 +198,25 @@ const Search: React.FC = () => {
                     setSelectedButton(null);
                   }}
                 />
+              </div> */}
+
+              <div className="flex flex-wrap gap-3 justify-center">
+                <SmallIconButton type="submit">
+                  <Image src={smallsearch} alt="search" width={12} height={12} style={{ marginRight: '6px' }}/>
+                  Search
+                </SmallIconButton>
+                <SmallIconButton onClick = {() => {
+                    setCarMake("");
+                    setModel("");
+                    setYear("");
+                    setEngineSize("");
+                    setSelectedButton(null);
+                  }}>
+                  <Image src={cancel} alt="cancel" width={12} height={12} style={{ marginRight: '4px' }}/>
+                  Clear Vehicle
+                </SmallIconButton>
               </div>
+
             </div>
 
             {isSmallScreen ? (
@@ -233,17 +274,20 @@ const Search: React.FC = () => {
         </div>
 
         <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleSubmit}>
-          <textarea
-            className="mt-2 w-4/5 h-12 bg-white p-2 rounded-md text-black border border-gray-300 focus:border-gray-700 focus:outline-none resize-none"
-            placeholder="Message VeerAI"
-            value={input}
-            onChange={handleInputChange}
-          />
-
-          <div className="my-6 flex flex-wrap gap-2 justify-center">
-            <Button type="submit" title="Search" variant="btn_dark_green" />
+          <div className="w-full flex items-center justify-center">
+            <textarea
+              className="w-4/5 h-12 bg-white p-2 rounded-md text-black border border-gray-300 focus:border-gray-700 focus:outline-none resize-none"
+              placeholder="Message VeerAI"
+              value={input}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+            />
+            <IconButton type="submit" className="ml-2">
+              <Image src={search} alt="search" width={30} height={30} />
+            </IconButton>
           </div>
         </form>
+        
       </section>
     </div>
   );

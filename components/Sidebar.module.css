@@ -1,29 +1,19 @@
+/* Sidebar.module.css */
+
 .sidebar {
-  width: 200px;
-  min-height: 100vh;
-  background-color: #f8f9fa;
-  border-right: 1px solid #e0e0e0;
+  width: 250px;
+  height: 100vh;
+  background-color: #f4f4f4;
   display: flex;
   flex-direction: column;
 }
 
 .header {
-  padding: 15px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.newChatButton {
-  background-color: rgb(250, 52, 52);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  cursor: pointer;
-  border-radius: 5px;
-  font-size: 14px;
-}
-
-.newChatButton:hover {
-  background-color: rgb(255, 121, 121);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
 }
 
 .chatList {
@@ -32,16 +22,10 @@
 }
 
 .chatItem {
-  padding: 10px;
+  padding: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-size: 14px;
-}
-
-.chatItem:hover {
-  background-color: #e9ecef;
 }
 
 .activeChat {
-  color: black;
+  background-color: #e0e0e0;
 }

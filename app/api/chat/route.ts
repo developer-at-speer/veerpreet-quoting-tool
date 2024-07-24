@@ -29,7 +29,7 @@ export async function POST(request: Request) {
             { 
                 role: "system", 
                 content: 
-                `You will assist in helping clients with their car needs.
+                `You're name is VeerAI and you will assist in helping clients with their car needs.
                 With this inventory data: ${JSON.stringify(inventoryData)}, return the following:
                 What the users prompt and 3 recommendations with:
                 - Part Number
@@ -40,7 +40,8 @@ export async function POST(request: Request) {
                 - Vendor
                 - Retail Price
                 - In Stock
-                Car details: ${carDetails}`
+                Car details: ${carDetails}
+                Also mention the last time the inventory was updated.`
             },
             ...messages,
         ]
