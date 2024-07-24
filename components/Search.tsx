@@ -185,7 +185,7 @@ const Search: React.FC = () => {
               </div>
               <div className="flex flex-wrap gap-3 justify-center">
                 <SmallIconButton type="submit">
-                  <Image src={smallsearch} alt="search" width={12} height={12} style={{ marginRight: '6px' }}/>
+                  {/* <Image src={smallsearch} alt="search" width={12} height={12} style={{ marginRight: '6px' }}/> */}
                   Search
                 </SmallIconButton>
                 <SmallIconButton onClick = {() => {
@@ -195,7 +195,7 @@ const Search: React.FC = () => {
                     setEngineSize("");
                     setSelectedButton(null);
                   }}>
-                  <Image src={cancel} alt="cancel" width={12} height={12} style={{ marginRight: '4px' }}/>
+                  {/* <Image src={cancel} alt="cancel" width={12} height={12} style={{ marginRight: '4px' }}/> */}
                   Clear Vehicle
                 </SmallIconButton>
               </div>
