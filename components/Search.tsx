@@ -91,27 +91,26 @@ const Search: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Handles submitting car details to backend from car text input box
+  const submitForm = async () => {
+    // Perform the additional POST request to the backend
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ messages, carDetails }),
+    });
+
+    // Call the existing handleSubmit function
+    handleSubmit(new Event("submit"));
+    setShouldSubmit(false);
+  };
+
   React.useEffect(() => {
-    const submitForm = async () => {
-      if (shouldSubmit) {
-        // Perform the additional POST request to the backend
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ messages, carDetails }),
-        });
-
-        // Call the existing handleSubmit function
-        handleSubmit(new Event("submit"));
-        setShouldSubmit(false);
-      }
-    };
-
-    submitForm();
-  }, [shouldSubmit, carDetails, handleSubmit, messages]);
+    if (shouldSubmit) {
+      submitForm();
+    }
+  }, [shouldSubmit]);
 
   const handleFormSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -137,7 +136,7 @@ const Search: React.FC = () => {
   return (
     <div className="min-h-[100vh] flex flex-col">
       <Toaster />
-      <section className="flex-grow items-center relative flex flex-col py-2 lg:mb-5 lg:py-4 xl:mb-10">
+      <section className="flex-grow flex flex-col py-2 lg:mb-5 lg:py-4 xl:mb-10">
         <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleFormSubmit}>
           <div className="flex flex-wrap w-full">
             <div style={{ display: "flex", flexDirection: "column", margin: "1rem" }}>
@@ -185,17 +184,16 @@ const Search: React.FC = () => {
               </div>
               <div className="flex flex-wrap gap-3 justify-center">
                 <SmallIconButton type="submit">
-                  {/* <Image src={smallsearch} alt="search" width={12} height={12} style={{ marginRight: '6px' }}/> */}
                   Search
                 </SmallIconButton>
-                <SmallIconButton onClick = {() => {
-                    setCarMake("");
-                    setModel("");
-                    setYear("");
-                    setEngineSize("");
-                    setSelectedButton(null);
-                  }}>
-                  {/* <Image src={cancel} alt="cancel" width={12} height={12} style={{ marginRight: '4px' }}/> */}
+                <SmallIconButton onClick={() => {
+                  setCarMake("");
+                  setModel("");
+                  setYear("");
+                  setEngineSize("");
+                  setSelectedButton(null);
+                }}>
+                  <Image src={cancel} alt="cancel" width={12} height={12} style={{ marginRight: '4px' }}/>
                   Clear Vehicle
                 </SmallIconButton>
               </div>
@@ -230,7 +228,7 @@ const Search: React.FC = () => {
           </div>
         </form>
 
-        <div className="mt-4 flex flex-col items-center w-full max-h-[400px] overflow-y-auto">
+        <div className="flex-grow mt-4 flex flex-col items-center w-full max-h-[400px] overflow-y-auto">
           {messages.map((message: Message) => {
             const isAssistant = message.role === "assistant";
 
@@ -255,19 +253,17 @@ const Search: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        <form className="mt-4 flex flex-col items-center w-full" onSubmit={handleSubmit}>
-          <div className="w-full flex items-center justify-center">
-            <textarea
-              className="w-4/5 h-12 bg-white p-2 rounded-md text-black border border-gray-300 focus:border-gray-700 focus:outline-none resize-none"
-              placeholder="Message VeerAI"
-              value={input}
-              onChange={handleInputChange}
-              onKeyPress={handleKeyPress}
-            />
-            <IconButton type="submit" className="ml-2">
-              <Image src={search} alt="search" width={30} height={30} />
-            </IconButton>
-          </div>
+        <form className="mt-4 w-full flex-none flex items-center justify-center" onSubmit={handleSubmit}>
+          <textarea
+            className="w-full h-12 bg-white p-2 rounded-md text-black border border-gray-300 focus:border-gray-700 focus:outline-none resize-none"
+            placeholder="Message VeerAI"
+            value={input}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+          />
+          <IconButton type="submit" className="ml-2">
+            <Image src={search} alt="search" width={30} height={30} />
+          </IconButton>
         </form>
         
       </section>
