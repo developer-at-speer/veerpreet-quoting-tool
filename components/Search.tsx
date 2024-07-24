@@ -2,7 +2,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import Button from "./Button";
 import Button2 from "@mui/material/Button";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -184,22 +183,6 @@ const Search: React.FC = () => {
                   style={{ margin: "0.5rem", width: "13ch" }}
                 />
               </div>
-              {/* <div className="flex flex-wrap gap-3 justify-center">
-                <Button type="submit" title="Search" variant="btn_dark_green" />
-                <Button
-                  type="button"
-                  title="Clear"
-                  variant="btn_dark_green"
-                  onClick={() => {
-                    setCarMake("");
-                    setModel("");
-                    setYear("");
-                    setEngineSize("");
-                    setSelectedButton(null);
-                  }}
-                />
-              </div> */}
-
               <div className="flex flex-wrap gap-3 justify-center">
                 <SmallIconButton type="submit">
                   <Image src={smallsearch} alt="search" width={12} height={12} style={{ marginRight: '6px' }}/>
@@ -216,7 +199,6 @@ const Search: React.FC = () => {
                   Clear Vehicle
                 </SmallIconButton>
               </div>
-
             </div>
 
             {isSmallScreen ? (
