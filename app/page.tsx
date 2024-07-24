@@ -1,9 +1,7 @@
-import Chatbox from "@/components/Chatbox";
 import Navbar from "@/components/Navbar";
 import ParseExcel from "@/components/ParseExcel";
 import Search from "@/components/Search";
 import Sidebar from "@/components/Sidebar";
-import Test from "@/components/test";
 
 
 export default function Home() {
@@ -17,8 +15,6 @@ export default function Home() {
             <div style={{ display: 'flex' }}>
               <div style={{ flex: 1 }}>
                 <Search />
-                {/* <Chatbox /> */}
-                {/* <Test /> */}
                 {/* <ParseExcel /> */}
               </div>
             </div>

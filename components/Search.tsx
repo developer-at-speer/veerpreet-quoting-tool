@@ -17,13 +17,14 @@ const Search: React.FC = () => {
   const [selectedButton, setSelectedButton] = React.useState<string | null>(null);
   const [hasSubmitted, setHasSubmitted] = React.useState<boolean>(false);
   const [shouldSubmit, setShouldSubmit] = React.useState<boolean>(false);
-
   const { input, handleInputChange, handleSubmit, isLoading, messages, setInput } = useChat();
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const isSmallScreen = useMediaQuery("(max-width:1375px)");
 
+  // Variable for car details
   const carDetails = `${year} ${carMake} ${model} ${engineSize}`;
 
+  // Handling car part buttons
   const handleButtonClick = (buttonLabel: string) => {
     setSelectedButton(buttonLabel);
   };
@@ -43,6 +44,7 @@ const Search: React.FC = () => {
     { label: "A/C Refill", group: 3 },
   ];
 
+  // Renders car parts buttons
   const renderButtons = (group: number) => {
     return buttons
       .filter((button) => button.group === group)
@@ -67,18 +69,19 @@ const Search: React.FC = () => {
       ));
   };
 
+  // Annimations for the chat messages
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
-
   React.useEffect(() => {
     if (hasSubmitted) {
       scrollToBottom();
     }
   }, [messages, hasSubmitted]);
 
+  // Handles submitting car details to backend from car text input box
   React.useEffect(() => {
     const submitForm = async () => {
       if (shouldSubmit) {
