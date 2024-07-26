@@ -25,6 +25,7 @@ const Search: React.FC = () => {
   const { input, handleInputChange, handleSubmit, messages, setInput } = useChat();
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const isSmallScreen = useMediaQuery("(max-width:1375px)");
+  const isBigScreen = useMediaQuery("(min-width:1520px)");
 
   // Variable for car details
   const carDetails = `${selectedButton} for ${year} ${carMake} ${model} ${engineSize}`;
@@ -142,6 +143,16 @@ const Search: React.FC = () => {
             <div style={{ display: "flex", flexDirection: "column", margin: "1rem" }}>
               <div>
                 <TextField
+                    required
+                    helperText="Year of Car"
+                    id="outlined-required"
+                    label="Year"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    size="small"
+                    style={{ margin: "0.5rem", width: "13ch" }}
+                  />
+                <TextField
                   required
                   helperText="Car Make"
                   id="outlined-required"
@@ -158,16 +169,6 @@ const Search: React.FC = () => {
                   label="Model"
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
-                  size="small"
-                  style={{ margin: "0.5rem", width: "13ch" }}
-                />
-                <TextField
-                  required
-                  helperText="Year of Car"
-                  id="outlined-required"
-                  label="Year"
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
                   size="small"
                   style={{ margin: "0.5rem", width: "13ch" }}
                 />
@@ -228,7 +229,7 @@ const Search: React.FC = () => {
           </div>
         </form>
 
-        <div className="flex-grow mt-4 flex flex-col items-center w-full max-h-[400px] overflow-y-auto">
+        <div className={`flex-grow mt-4 flex flex-col items-center w-full overflow-y-auto ${isBigScreen ? 'max-h-[690px]' : 'max-h-[500px]'}`}>
           {messages.map((message: Message) => {
             const isAssistant = message.role === "assistant";
 
