@@ -17,7 +17,7 @@ export default function Home() {
             <div style={{ display: 'flex' }}>
               <div style={{ flex: 1 }}>
                 <Search />
-                <CarMakes />
+                {/* <CarMakes /> */}
                 {/* <ParseExcel /> */}
               </div>
             </div>

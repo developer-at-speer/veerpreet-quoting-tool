@@ -1,17 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-const BASE_URL = "https://carapi.app/api/makes";
-
-interface Post {
-  id: number;
-  name: string;
-}
+const BASE_URL = "http://localhost:3004/api/makes";
 
 export default function Demo() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [carMakes, setCarMakes] = useState<{ id: number; name: string }[]>([]);
   const [page, setPage] = useState(0);
 
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -21,8 +16,8 @@ export default function Demo() {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
-      abortControllerRef.current = new AbortController();
 
+      abortControllerRef.current = new AbortController();
       setIsLoading(true);
       setError(null);
 
@@ -36,7 +31,14 @@ export default function Demo() {
         }
 
         const data = await response.json();
-        setPosts(data);
+        console.log("Fetched data:", data); // Log the fetched data to inspect its structure
+
+        // Extract the array from the 'data' property
+        if (data && Array.isArray(data.data)) {
+          setCarMakes(data.data);
+        } else {
+          throw new Error("Fetched data does not contain an array in 'data' property");
+        }
       } catch (e: any) {
         if (e.name === "AbortError") {
           console.log("Fetch aborted");
@@ -51,6 +53,13 @@ export default function Demo() {
     };
 
     fetchPosts();
+
+    // Cleanup function to abort the fetch request when the component unmounts or page changes
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [page]);
 
   if (error) {
@@ -59,13 +68,14 @@ export default function Demo() {
 
   return (
     <div className="tutorial">
-      <h1 className="mb-4 text-2xl">Data Fetching in React</h1>
-      <button onClick={() => setPage(page + 1)}>Increase Page ({page})</button>
+      <h1 className="mb-4 text-2xl">Car Makes</h1>
       {isLoading && <div>Loading...</div>}
       {!isLoading && (
         <ul>
-          {posts.map((post) => (
-            <li key={post.id}>{post.name}</li>
+          {carMakes.map((make) => (
+            <li key={make.id}>
+              {make.id}: {make.name}
+            </li>
           ))}
         </ul>
       )}
