@@ -1,17 +1,17 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-const BASE_URL = "http://localhost:3004/api/trims?year=2015&make=Toyota&model=Venza";
+const BASE_URL = "http://localhost:3004/api/engines?year=2015&make=Toyota&model=Venza&trim=LE";
 
 export default function Demo() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [trims, setTrims] = useState<{ id: number; name: string; description: string; msrp: number; invoice: number }[]>([]);
+  const [engineSizes, setEngineSizes] = useState<{ id: number; size: number }[]>([]);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    const fetchTrims = async () => {
+    const fetchEngineSizes = async () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -34,7 +34,7 @@ export default function Demo() {
 
         // Extract the array from the 'data' property
         if (data && Array.isArray(data.data)) {
-          setTrims(data.data);
+          setEngineSizes(data.data);
         } else {
           throw new Error("Fetched data does not contain an array in 'data' property");
         }
@@ -51,7 +51,7 @@ export default function Demo() {
       }
     };
 
-    fetchTrims();
+    fetchEngineSizes();
 
     // Cleanup function to abort the fetch request when the component unmounts
     return () => {
@@ -67,13 +67,13 @@ export default function Demo() {
 
   return (
     <div className="tutorial">
-      <h1 className="mb-4 text-2xl">Car Trims</h1>
+      <h1 className="mb-4 text-2xl">Car Engine Sizes</h1>
       {isLoading && <div>Loading...</div>}
       {!isLoading && (
         <ul>
-          {trims.map((trim) => (
-            <li key={trim.id}>
-              {trim.description} 
+          {engineSizes.map((engineSize) => (
+            <li key={engineSize.id}>
+              {engineSize.size} 
             </li>
           ))}
         </ul>

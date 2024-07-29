@@ -20,38 +20,50 @@ import Autocomplete from "@mui/material/Autocomplete";
 const BASE_URL = "http://localhost:3004/api";
 
 const Search: React.FC = () => {
+  // State variables
+  // Store error message that may occur during API fetch. Loading indicates whether data is being fetched.
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  //Gets the lists of different makes, model, trims, and engine sizes. Stores it inside array.
   const [carMakes, setCarMakes] = useState<{ id: number; name: string }[]>([]);
   const [carModels, setCarModels] = useState<{ id: number; name: string }[]>([]);
   const [carTrims, setCarTrims] = useState<{ id: number; name: string; description: string }[]>([]);
+  const [carEngineSizes, setCarEngineSizes] = useState<{ id: number; size: number }[]>([]);
   const [page, setPage] = useState(0);
 
+  // References the text inputs. Prompts user to input the next text input.
   const yearInputRef = useRef<HTMLInputElement>(null);
   const makeInputRef = useRef<HTMLInputElement>(null);
   const modelInputRef = useRef<HTMLInputElement>(null);
-  const engineSizeInputRef = useRef<HTMLInputElement>(null);
   const trimInputRef = useRef<HTMLInputElement>(null);
+  const engineSizeInputRef = useRef<HTMLInputElement>(null);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const [carMake, setCarMake] = React.useState<string>("");
-  const [model, setModel] = React.useState<string>("");
-  const [year, setYear] = React.useState<string>("");
-  const [trim, setTrim] = React.useState<string>("");
-  const [engineSize, setEngineSize] = React.useState<string>("");
-  const [selectedButton, setSelectedButton] = React.useState<string | null>(null);
-  const [shouldSubmit, setShouldSubmit] = React.useState<boolean>(false);
+  // Stores the users selected inputs
+  const [carMake, setCarMake] = useState<string>("");
+  const [model, setModel] = useState<string>("");
+  const [year, setYear] = useState<string>("");
+  const [trim, setTrim] = useState<string>("");
+  const [engineSize, setEngineSize] = useState<string>("");
+  const [selectedButton, setSelectedButton] = useState<string | null>(null);
+
+  // Indicates when the form (car inputs) should be submitted
+  const [shouldSubmit, setShouldSubmit] = useState<boolean>(false);
+
+  // Hooks to manage chat inputs
   const { input, handleInputChange, handleSubmit, messages, setInput } = useChat();
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
   const isSmallScreen = useMediaQuery("(max-width:1440px)");
   const isBigScreen = useMediaQuery("(min-width:1520px)");
 
   const years = Array.from({ length: 2024 - 1950 + 1 }, (_, index) => (1950 + index).toString());
-  const engineSizes = ["1.0L", "1.2L", "1.5L", "1.6L", "1.8L", "2.0L", "2.2L", "2.4L", "3.0L", "3.5L", "4.0L"];
 
-  const carDetails = `${selectedButton} for ${year} ${carMake} ${model} ${trim} ${engineSize}`;
+  const carDetails = `${selectedButton} for ${year} ${carMake} ${model} ${trim} ${engineSize} L`;
 
+  // Fetches car makes from CarAPI
   useEffect(() => {
     const fetchPosts = async () => {
       if (abortControllerRef.current) {
@@ -101,10 +113,11 @@ const Search: React.FC = () => {
     };
   }, [page]);
 
+  // Fetches car models from CarAPI. useEffect is the hook used since it manages the lifecycle of a fetch request to the car makes API endpoint.
   useEffect(() => {
     const fetchCarModels = async () => {
       if (carMake && year) {
-        setIsLoading(true);
+        setIsLoading(true); // Indicates data is being fetched
         try {
           const response = await fetch(`${BASE_URL}/models?year=${year}&make=${carMake}`);
           if (!response.ok) {
@@ -128,8 +141,9 @@ const Search: React.FC = () => {
     };
 
     fetchCarModels();
-  }, [carMake, year]);
+  }, [carMake, year]); //Dependencies, only performed if all dependencies been set
 
+  // Fetches car trims from CarAPI
   useEffect(() => {
     const fetchCarTrims = async () => {
       if (carMake && year && model) {
@@ -159,10 +173,42 @@ const Search: React.FC = () => {
     fetchCarTrims();
   }, [carMake, year, model]);
 
+  // Fetches car engines for specific trim and model
+  useEffect(() => {
+    const fetchEngineSizes = async () => {
+      if (carMake && year && model && trim) {
+        setIsLoading(true);
+        try {
+          const response = await fetch(`${BASE_URL}/engines?year=${year}&make=${carMake}&model=${model}&trim=${trim}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log("Fetched engines data:", data);
+
+          if (data && Array.isArray(data.data)) {
+            setCarEngineSizes(data.data);
+          } else {
+            throw new Error("Fetched data does not contain an array in 'data' property");
+          }
+        } catch (e: any) {
+          console.error("Fetch error:", e);
+          setError(e.message || "Something went wrong");
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchEngineSizes();
+  }, [carMake, year, model, trim]);
+
+  // Function to handle button click for car parts
   const handleButtonClick = (buttonLabel: string) => {
     setSelectedButton(buttonLabel);
   };
 
+  // Car part buttons
   const buttons = [
     { label: "Oil Change", group: 1 },
     { label: "Tire Change", group: 1 },
@@ -183,6 +229,7 @@ const Search: React.FC = () => {
     padding: "0.5rem",
   });
 
+  // Handles the buttons for car part selection
   const renderButtons = (group: number) => {
     return buttons
       .filter((button) => button.group === group)
@@ -207,16 +254,17 @@ const Search: React.FC = () => {
       ));
   };
 
+  // Animation to scroll to bottom of the chat log
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
-
   React.useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  // Submits the users text inputs from the Car input field to the OpenAI Backend
   const submitForm = async () => {
     const response = await fetch("/api/chat", {
       method: "POST",
@@ -392,7 +440,7 @@ const Search: React.FC = () => {
                 />
                 <Autocomplete
                   freeSolo
-                  options={engineSizes}
+                  options={carEngineSizes.map((e) => e.size.toString())}
                   value={engineSize}
                   onChange={(event, newValue) => {
                     setEngineSize(newValue || "");
@@ -400,14 +448,15 @@ const Search: React.FC = () => {
                   inputValue={engineSize}
                   onInputChange={(event, newInputValue) => {
                     setEngineSize(newInputValue);
+                    const matchingEngineSizes = carEngineSizes.filter((e) =>
+                      e.size.toString().startsWith(newInputValue)
+                    );
                   }}
                   renderInput={(params) => (
                     <TextField
                       {...params}
                       helperText="(Optional)"
-                      id="outlined-basic"
                       label="Engine Size"
-                      variant="outlined"
                       size="small"
                       style={{ margin: "0.5rem", width: "12ch" }}
                       inputRef={engineSizeInputRef}
