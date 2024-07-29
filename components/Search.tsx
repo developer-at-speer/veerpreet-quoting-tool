@@ -17,7 +17,7 @@ import { styled } from "@mui/material/styles";
 import toast, { Toaster } from "react-hot-toast";
 import Autocomplete from "@mui/material/Autocomplete";
 
-const BASE_URL = "http://localhost:3004/api";
+const BASE_URL = "https://vpsc-carapi.onrender.com/api";
 
 const Search: React.FC = () => {
   // State variables
