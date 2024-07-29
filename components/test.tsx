@@ -1,18 +1,17 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-const BASE_URL = "http://localhost:3004/api/makes";
+const BASE_URL = "http://localhost:3004/api/trims?year=2015&make=Toyota&model=Venza";
 
 export default function Demo() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [carMakes, setCarMakes] = useState<{ id: number; name: string }[]>([]);
-  const [page, setPage] = useState(0);
+  const [trims, setTrims] = useState<{ id: number; name: string; description: string; msrp: number; invoice: number }[]>([]);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchTrims = async () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -35,7 +34,7 @@ export default function Demo() {
 
         // Extract the array from the 'data' property
         if (data && Array.isArray(data.data)) {
-          setCarMakes(data.data);
+          setTrims(data.data);
         } else {
           throw new Error("Fetched data does not contain an array in 'data' property");
         }
@@ -52,15 +51,15 @@ export default function Demo() {
       }
     };
 
-    fetchPosts();
+    fetchTrims();
 
-    // Cleanup function to abort the fetch request when the component unmounts or page changes
+    // Cleanup function to abort the fetch request when the component unmounts
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
     };
-  }, [page]);
+  }, []);
 
   if (error) {
     return <div>Something went wrong! Please try again. Error: {error}</div>;
@@ -68,13 +67,13 @@ export default function Demo() {
 
   return (
     <div className="tutorial">
-      <h1 className="mb-4 text-2xl">Car Makes</h1>
+      <h1 className="mb-4 text-2xl">Car Trims</h1>
       {isLoading && <div>Loading...</div>}
       {!isLoading && (
         <ul>
-          {carMakes.map((make) => (
-            <li key={make.id}>
-              {make.id}: {make.name}
+          {trims.map((trim) => (
+            <li key={trim.id}>
+              {trim.description} 
             </li>
           ))}
         </ul>
