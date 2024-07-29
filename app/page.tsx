@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import ParseExcel from "@/components/ParseExcel";
 import Search from "@/components/Search";
 import Sidebar from "@/components/Sidebar";
+import Demo from "@/components/test";
 import CarMakes from "@/components/test"
 
 
@@ -17,6 +18,7 @@ export default function Home() {
             <div style={{ display: 'flex' }}>
               <div style={{ flex: 1 }}>
                 <Search />
+                {/* <Demo /> */}
                 {/* <CarMakes /> */}
                 {/* <ParseExcel /> */}
               </div>

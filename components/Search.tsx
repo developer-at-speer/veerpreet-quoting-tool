@@ -10,10 +10,10 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Image from "next/image";
 import search from "../public/arrow.svg";
-import smallsearch from "../public/small-search.svg"
+import smallsearch from "../public/small-search.svg";
 import cancel from "../public/cancel.svg";
 import IconButton from "@mui/material/IconButton";
-import { styled } from '@mui/material/styles';
+import { styled } from "@mui/material/styles";
 import toast, { Toaster } from "react-hot-toast";
 import Autocomplete from "@mui/material/Autocomplete";
 
@@ -24,14 +24,33 @@ const Search: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [carMakes, setCarMakes] = useState<{ id: number; name: string }[]>([]);
   const [carModels, setCarModels] = useState<{ id: number; name: string }[]>([]);
+  const [carTrims, setCarTrims] = useState<{ id: number; name: string; description: string }[]>([]);
   const [page, setPage] = useState(0);
 
   const yearInputRef = useRef<HTMLInputElement>(null);
   const makeInputRef = useRef<HTMLInputElement>(null);
   const modelInputRef = useRef<HTMLInputElement>(null);
   const engineSizeInputRef = useRef<HTMLInputElement>(null);
+  const trimInputRef = useRef<HTMLInputElement>(null);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const [carMake, setCarMake] = React.useState<string>("");
+  const [model, setModel] = React.useState<string>("");
+  const [year, setYear] = React.useState<string>("");
+  const [trim, setTrim] = React.useState<string>("");
+  const [engineSize, setEngineSize] = React.useState<string>("");
+  const [selectedButton, setSelectedButton] = React.useState<string | null>(null);
+  const [shouldSubmit, setShouldSubmit] = React.useState<boolean>(false);
+  const { input, handleInputChange, handleSubmit, messages, setInput } = useChat();
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const isSmallScreen = useMediaQuery("(max-width:1440px)");
+  const isBigScreen = useMediaQuery("(min-width:1520px)");
+
+  const years = Array.from({ length: 2024 - 1950 + 1 }, (_, index) => (1950 + index).toString());
+  const engineSizes = ["1.0L", "1.2L", "1.5L", "1.6L", "1.8L", "2.0L", "2.2L", "2.4L", "3.0L", "3.5L", "4.0L"];
+
+  const carDetails = `${selectedButton} for ${year} ${carMake} ${model} ${trim} ${engineSize}`;
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -82,26 +101,63 @@ const Search: React.FC = () => {
     };
   }, [page]);
 
-  if (error) {
-    return <div>Something went wrong! Please try again. Error: {error}</div>;
-  }
+  useEffect(() => {
+    const fetchCarModels = async () => {
+      if (carMake && year) {
+        setIsLoading(true);
+        try {
+          const response = await fetch(`${BASE_URL}/models?year=${year}&make=${carMake}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log("Fetched models data:", data);
 
-  const [carMake, setCarMake] = React.useState<string>("");
-  const [model, setModel] = React.useState<string>("");
-  const [year, setYear] = React.useState<string>("");
-  const [trim, setTrim] = React.useState<string>("");
-  const [engineSize, setEngineSize] = React.useState<string>("");
-  const [selectedButton, setSelectedButton] = React.useState<string | null>(null);
-  const [shouldSubmit, setShouldSubmit] = React.useState<boolean>(false);
-  const { input, handleInputChange, handleSubmit, messages, setInput } = useChat();
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
-  const isSmallScreen = useMediaQuery("(max-width:1375px)");
-  const isBigScreen = useMediaQuery("(min-width:1520px)");
+          if (data && Array.isArray(data.data)) {
+            setCarModels(data.data);
+          } else {
+            throw new Error("Fetched data does not contain an array in 'data' property");
+          }
+        } catch (e: any) {
+          console.error("Fetch error:", e);
+          setError(e.message || "Something went wrong");
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
 
-  const years = Array.from({ length: 2024 - 1950 + 1 }, (_, index) => (1950 + index).toString());
-  const engineSizes = ["1.0L", "1.2L", "1.5L", "1.6L", "1.8L", "2.0L", "2.2L", "2.4L", "3.0L", "3.5L", "4.0L"];
+    fetchCarModels();
+  }, [carMake, year]);
 
-  const carDetails = `${selectedButton} for ${year} ${carMake} ${model} ${engineSize}`;
+  useEffect(() => {
+    const fetchCarTrims = async () => {
+      if (carMake && year && model) {
+        setIsLoading(true);
+        try {
+          const response = await fetch(`${BASE_URL}/trims?year=${year}&make=${carMake}&model=${model}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log("Fetched trims data:", data);
+
+          if (data && Array.isArray(data.data)) {
+            setCarTrims(data.data);
+          } else {
+            throw new Error("Fetched data does not contain an array in 'data' property");
+          }
+        } catch (e: any) {
+          console.error("Fetch error:", e);
+          setError(e.message || "Something went wrong");
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchCarTrims();
+  }, [carMake, year, model]);
 
   const handleButtonClick = (buttonLabel: string) => {
     setSelectedButton(buttonLabel);
@@ -123,8 +179,8 @@ const Search: React.FC = () => {
   ];
 
   const SmallIconButton = styled(IconButton)({
-    fontSize: '1rem',
-    padding: '0.5rem',
+    fontSize: "1rem",
+    padding: "0.5rem",
   });
 
   const renderButtons = (group: number) => {
@@ -199,35 +255,6 @@ const Search: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchCarModels = async () => {
-      if (carMake && year) {
-        setIsLoading(true);
-        try {
-          const response = await fetch(`${BASE_URL}/models?year=${year}&make=${carMake}`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("Fetched models data:", data);
-
-          if (data && Array.isArray(data.data)) {
-            setCarModels(data.data);
-          } else {
-            throw new Error("Fetched data does not contain an array in 'data' property");
-          }
-        } catch (e: any) {
-          console.error("Fetch error:", e);
-          setError(e.message || "Something went wrong");
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchCarModels();
-  }, [carMake, year]);
-
   return (
     <div className="min-h-[100vh] flex flex-col">
       <Toaster />
@@ -260,25 +287,27 @@ const Search: React.FC = () => {
                       helperText="Year of Car"
                       label="Year"
                       size="small"
-                      style={{ margin: "0.5rem", width: "13ch" }}
+                      style={{ margin: "0.5rem", width: "10ch" }}
                       inputRef={yearInputRef}
                     />
                   )}
                 />
                 <Autocomplete
                   freeSolo
-                  options={carMakes.map(make => make.name)}
+                  options={carMakes.map((make) => make.name)}
                   value={carMake}
                   onChange={(event, newValue) => {
                     setCarMake(newValue || "");
-                    if (carMakes.some(make => make.name === newValue)) {
+                    if (carMakes.some((make) => make.name === newValue)) {
                       modelInputRef.current?.focus();
                     }
                   }}
                   inputValue={carMake}
                   onInputChange={(event, newInputValue) => {
                     setCarMake(newInputValue);
-                    const matchingMakes = carMakes.filter(make => make.name.toLowerCase().startsWith(newInputValue.toLowerCase()));
+                    const matchingMakes = carMakes.filter((make) =>
+                      make.name.toLowerCase().startsWith(newInputValue.toLowerCase())
+                    );
                     if (matchingMakes.length === 1) {
                       setCarMake(matchingMakes[0].name);
                       modelInputRef.current?.focus();
@@ -291,28 +320,30 @@ const Search: React.FC = () => {
                       helperText="Car Make"
                       label="Car Make"
                       size="small"
-                      style={{ margin: "0.5rem", width: "13ch" }}
+                      style={{ margin: "0.5rem", width: "12ch" }}
                       inputRef={makeInputRef}
                     />
                   )}
                 />
                 <Autocomplete
                   freeSolo
-                  options={carModels.map(m => m.name)}
+                  options={carModels.map((m) => m.name)}
                   value={model}
                   onChange={(event, newValue) => {
                     setModel(newValue || "");
-                    if (carModels.some(m => m.name === newValue)) {
-                      engineSizeInputRef.current?.focus();
+                    if (carModels.some((m) => m.name === newValue)) {
+                      trimInputRef.current?.focus();
                     }
                   }}
                   inputValue={model}
                   onInputChange={(event, newInputValue) => {
                     setModel(newInputValue);
-                    const matchingModels = carModels.filter(m => m.name.toLowerCase().startsWith(newInputValue.toLowerCase()));
+                    const matchingModels = carModels.filter((m) =>
+                      m.name.toLowerCase().startsWith(newInputValue.toLowerCase())
+                    );
                     if (matchingModels.length === 1) {
                       setModel(matchingModels[0].name);
-                      engineSizeInputRef.current?.focus();
+                      trimInputRef.current?.focus();
                     }
                   }}
                   renderInput={(params) => (
@@ -322,8 +353,40 @@ const Search: React.FC = () => {
                       helperText="Model of Car"
                       label="Model"
                       size="small"
-                      style={{ margin: "0.5rem", width: "13ch" }}
+                      style={{ margin: "0.5rem", width: "12ch" }}
                       inputRef={modelInputRef}
+                    />
+                  )}
+                />
+                <Autocomplete
+                  freeSolo
+                  options={carTrims.map((t) => t.name)}
+                  value={trim}
+                  onChange={(event, newValue) => {
+                    setTrim(newValue || "");
+                    if (carTrims.some((t) => t.description === newValue)) {
+                      engineSizeInputRef.current?.focus();
+                    }
+                  }}
+                  inputValue={trim}
+                  onInputChange={(event, newInputValue) => {
+                    setTrim(newInputValue);
+                    const matchingTrims = carTrims.filter((t) =>
+                      t.name.toLowerCase().startsWith(newInputValue.toLowerCase())
+                    );
+                    if (matchingTrims.length === 1) {
+                      setTrim(matchingTrims[0].name);
+                      engineSizeInputRef.current?.focus();
+                    }
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      helperText="Trim of Model"
+                      label="Trim"
+                      size="small"
+                      style={{ margin: "0.5rem", width: "12ch" }}
+                      inputRef={trimInputRef}
                     />
                   )}
                 />
@@ -346,27 +409,11 @@ const Search: React.FC = () => {
                       label="Engine Size"
                       variant="outlined"
                       size="small"
-                      style={{ margin: "0.5rem", width: "13ch" }}
+                      style={{ margin: "0.5rem", width: "12ch" }}
                       inputRef={engineSizeInputRef}
                     />
                   )}
                 />
-              </div>
-              <div className="flex flex-wrap gap-3 justify-center">
-                <SmallIconButton type="submit">
-                  <Image src={smallsearch} alt="search" width={12} height={12} style={{ marginRight: '8px' }}/>
-                  Search
-                </SmallIconButton>
-                <SmallIconButton onClick={() => {
-                  setCarMake("");
-                  setModel("");
-                  setYear("");
-                  setEngineSize("");
-                  setSelectedButton(null);
-                }}>
-                  <Image src={cancel} alt="cancel" width={12} height={12} style={{ marginRight: '4px' }}/>
-                  Clear Vehicle
-                </SmallIconButton>
               </div>
             </div>
 
@@ -397,9 +444,32 @@ const Search: React.FC = () => {
               </Box>
             )}
           </div>
+          <div className="flex flex-wrap gap-3 justify-left">
+            <SmallIconButton type="submit">
+              <Image src={smallsearch} alt="search" width={12} height={12} style={{ marginRight: "8px" }} />
+              Search
+            </SmallIconButton>
+            <SmallIconButton
+              onClick={() => {
+                setCarMake("");
+                setModel("");
+                setYear("");
+                setEngineSize("");
+                setTrim("");
+                setSelectedButton(null);
+              }}
+            >
+              <Image src={cancel} alt="cancel" width={12} height={12} style={{ marginRight: "4px" }} />
+              Clear Vehicle
+            </SmallIconButton>
+          </div>
         </form>
 
-        <div className={`flex-grow mt-4 flex flex-col items-center w-full overflow-y-auto ${isBigScreen ? 'max-h-[690px]' : 'max-h-[500px]'}`}>
+        <div
+          className={`flex-grow mt-4 flex flex-col items-center w-full overflow-y-auto ${
+            isBigScreen ? "max-h-[690px]" : "max-h-[500px]"
+          }`}
+        >
           {messages.map((message: Message) => {
             const isAssistant = message.role === "assistant";
 
@@ -436,7 +506,6 @@ const Search: React.FC = () => {
             <Image src={search} alt="search" width={30} height={30} />
           </IconButton>
         </form>
-        
       </section>
     </div>
   );
