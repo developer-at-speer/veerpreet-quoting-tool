@@ -65,7 +65,9 @@ const Search: React.FC = () => {
 
   const years = Array.from({ length: 2024 - 1950 + 1 }, (_, index) => (1950 + index).toString());
 
-  const carDetails = `${selectedButton} for ${year} ${carMake} ${model} ${trim} ${engineSize}`;
+  // const carDetails = `${selectedButton} for ${year} ${carMake} ${model} ${trim} ${engineSize}`;
+
+  const carDetails = `${year} ${carMake} ${model} ${trim} ${engineSize}`;
 
   // Fetches car makes from CarAPI
   useEffect(() => {
