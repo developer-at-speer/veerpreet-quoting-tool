@@ -16,7 +16,11 @@ import IconButton from "@mui/material/IconButton";
 import { styled } from "@mui/material/styles";
 import toast, { Toaster } from "react-hot-toast";
 import Autocomplete from "@mui/material/Autocomplete";
+import Collapse from "@mui/material/Collapse";
+import Fade from "@mui/material/Fade";
+import Grow from "@mui/material/Grow";
 
+// Proxy Server for CarAPI
 const BASE_URL = "https://vpsc-carapi.onrender.com/api";
 
 const Search: React.FC = () => {
@@ -61,7 +65,9 @@ const Search: React.FC = () => {
 
   const years = Array.from({ length: 2024 - 1950 + 1 }, (_, index) => (1950 + index).toString());
 
-  const carDetails = `${selectedButton} for ${year} ${carMake} ${model} ${trim} ${engineSize} L`;
+  // const carDetails = `${selectedButton} for ${year} ${carMake} ${model} ${trim} ${engineSize}`;
+
+  const carDetails = `${year} ${carMake} ${model} ${trim} ${engineSize}`;
 
   // Fetches car makes from CarAPI
   useEffect(() => {
@@ -227,6 +233,10 @@ const Search: React.FC = () => {
   const SmallIconButton = styled(IconButton)({
     fontSize: "1rem",
     padding: "0.5rem",
+    transition: "background-color 0.3s ease",
+    "&:hover": {
+      backgroundColor: "#f0f0f0",
+    },
   });
 
   // Handles the buttons for car part selection
@@ -234,23 +244,24 @@ const Search: React.FC = () => {
     return buttons
       .filter((button) => button.group === group)
       .map((button, index) => (
-        <Button2
-          key={index}
-          variant="outlined"
-          size="small"
-          onClick={() => handleButtonClick(button.label)}
-          sx={{
-            m: 1,
-            backgroundColor: selectedButton === button.label ? "#c7c7c7" : "#ededed",
-            color: "grey",
-            borderColor: selectedButton === button.label ? "#c7c7c7" : "#ededed",
-            "&:hover": {
-              borderColor: "#c7c7c7",
-            },
-          }}
-        >
-          {button.label}
-        </Button2>
+        <Grow in={true} key={index}>
+          <Button2
+            variant="outlined"
+            size="small"
+            onClick={() => handleButtonClick(button.label)}
+            sx={{
+              m: 1,
+              backgroundColor: selectedButton === button.label ? "#c7c7c7" : "#ededed",
+              color: "grey",
+              borderColor: selectedButton === button.label ? "#c7c7c7" : "#ededed",
+              "&:hover": {
+                borderColor: "#c7c7c7",
+              },
+            }}
+          >
+            {button.label}
+          </Button2>
+        </Grow>
       ));
   };
 
@@ -311,6 +322,7 @@ const Search: React.FC = () => {
           <div className="flex flex-wrap w-full">
             <div style={{ display: "flex", flexDirection: "column", margin: "1rem" }}>
               <div style={{ display: "flex", flexWrap: "wrap" }}>
+                {/* Year Text Input */}
                 <Autocomplete
                   freeSolo
                   options={years}
@@ -335,17 +347,24 @@ const Search: React.FC = () => {
                       helperText="Year of Car"
                       label="Year"
                       size="small"
-                      style={{ margin: "0.5rem", width: "10ch" }}
+                      style={{ margin: "0.5rem", width: "10ch", transition: "all 0.3s ease" }}
                       inputRef={yearInputRef}
                     />
                   )}
                 />
+
+                {/* Car Make Input */}
                 <Autocomplete
                   freeSolo
                   options={carMakes.map((make) => make.name)}
                   value={carMake}
                   onChange={(event, newValue) => {
                     setCarMake(newValue || "");
+                    if (!newValue) {
+                      setModel("");
+                      setTrim("");
+                      setEngineSize("");
+                    }
                     if (carMakes.some((make) => make.name === newValue)) {
                       modelInputRef.current?.focus();
                     }
@@ -353,6 +372,11 @@ const Search: React.FC = () => {
                   inputValue={carMake}
                   onInputChange={(event, newInputValue) => {
                     setCarMake(newInputValue);
+                    if (!newInputValue) {
+                      setModel("");
+                      setTrim("");
+                      setEngineSize("");
+                    }
                     const matchingMakes = carMakes.filter((make) =>
                       make.name.toLowerCase().startsWith(newInputValue.toLowerCase())
                     );
@@ -368,30 +392,48 @@ const Search: React.FC = () => {
                       helperText="Car Make"
                       label="Car Make"
                       size="small"
-                      style={{ margin: "0.5rem", width: "12ch" }}
+                      style={{ margin: "0.5rem", width: "14ch", transition: "all 0.3s ease" }}
                       inputRef={makeInputRef}
                     />
                   )}
                 />
+
+                {/* Car Model Input */}
                 <Autocomplete
-                  freeSolo
-                  options={carModels.map((m) => m.name)}
-                  value={model}
+                  freeSolo // Allow users to input values that are not options from the option list
+                  options={carModels.map((m) => m.name)} // Fetches options from API
+                  value={model} // Store in variable called model
                   onChange={(event, newValue) => {
-                    setModel(newValue || "");
+                    setModel(newValue || ""); // Ensures the model starts off as an empty string, then keeps the state in sync with user 
+                    
+                    // Clears the rest of the values to the left if model is cleared
+                    if (!newValue) {
+                      setTrim("");
+                      setEngineSize("");
+                    } 
+                    
+                    // Condition that checks if a car model from the options matches the users input
                     if (carModels.some((m) => m.name === newValue)) {
-                      trimInputRef.current?.focus();
+                      trimInputRef.current?.focus(); // If the condition is true, shifts to the nexts text input
                     }
                   }}
-                  inputValue={model}
+                  inputValue={model} // Value displayed in the input field
+                  
+                  // Function that is called whenver the value of the input field is changed
                   onInputChange={(event, newInputValue) => {
-                    setModel(newInputValue);
+                    setModel(newInputValue); // Setter function for the model variable
+                    if (!newInputValue) {
+                      setTrim("");
+                      setEngineSize("");
+                    }
                     const matchingModels = carModels.filter((m) =>
                       m.name.toLowerCase().startsWith(newInputValue.toLowerCase())
                     );
-                    if (matchingModels.length === 1) {
-                      setModel(matchingModels[0].name);
-                      trimInputRef.current?.focus();
+
+                    // Checks if there is a car model that matches the users input
+                    if (matchingModels.length === 1) { // Checks if the users input value matches with exactly one car model
+                      setModel(matchingModels[0].name); // Sets the model to the one matching model
+                      trimInputRef.current?.focus(); // If the condition is true, shifts to the nexts text input
                     }
                   }}
                   renderInput={(params) => (
@@ -401,24 +443,32 @@ const Search: React.FC = () => {
                       helperText="Model of Car"
                       label="Model"
                       size="small"
-                      style={{ margin: "0.5rem", width: "12ch" }}
+                      style={{ margin: "0.5rem", width: "12ch", transition: "all 0.3s ease" }}
                       inputRef={modelInputRef}
                     />
                   )}
                 />
+
+                {/* Car Trim Input */}
                 <Autocomplete
                   freeSolo
-                  options={carTrims.map((t) => t.name)}
+                  options={Array.from(new Set(carTrims.map((t) => t.name)))} // Remove duplicates by converting to a Set and back to an array
                   value={trim}
                   onChange={(event, newValue) => {
                     setTrim(newValue || "");
-                    if (carTrims.some((t) => t.description === newValue)) {
+                    if (!newValue) {
+                      setEngineSize("");
+                    }
+                    if (carTrims.some((t) => t.name === newValue)) {
                       engineSizeInputRef.current?.focus();
                     }
                   }}
                   inputValue={trim}
                   onInputChange={(event, newInputValue) => {
                     setTrim(newInputValue);
+                    if (!newInputValue) {
+                      setEngineSize("");
+                    }
                     const matchingTrims = carTrims.filter((t) =>
                       t.name.toLowerCase().startsWith(newInputValue.toLowerCase())
                     );
@@ -430,17 +480,20 @@ const Search: React.FC = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
+                      required
                       helperText="Trim of Model"
                       label="Trim"
                       size="small"
-                      style={{ margin: "0.5rem", width: "12ch" }}
+                      style={{ margin: "0.5rem", width: "12ch", transition: "all 0.3s ease" }}
                       inputRef={trimInputRef}
                     />
                   )}
                 />
+
+                {/* Car Engine Size Input */}
                 <Autocomplete
                   freeSolo
-                  options={carEngineSizes.map((e) => e.size.toString())}
+                  options={Array.from(new Set(carEngineSizes.map((e) => `${e.size} L`)))}
                   value={engineSize}
                   onChange={(event, newValue) => {
                     setEngineSize(newValue || "");
@@ -448,9 +501,6 @@ const Search: React.FC = () => {
                   inputValue={engineSize}
                   onInputChange={(event, newInputValue) => {
                     setEngineSize(newInputValue);
-                    const matchingEngineSizes = carEngineSizes.filter((e) =>
-                      e.size.toString().startsWith(newInputValue)
-                    );
                   }}
                   renderInput={(params) => (
                     <TextField
@@ -458,7 +508,7 @@ const Search: React.FC = () => {
                       helperText="(Optional)"
                       label="Engine Size"
                       size="small"
-                      style={{ margin: "0.5rem", width: "12ch" }}
+                      style={{ margin: "0.5rem", width: "14ch", transition: "all 0.3s ease" }}
                       inputRef={engineSizeInputRef}
                     />
                   )}
@@ -466,17 +516,24 @@ const Search: React.FC = () => {
               </div>
             </div>
 
+            {/* Car Part Buttons */}
             {isSmallScreen ? (
-              <Box sx={{ m: 1, width: "100%", display: "flex", justifyContent: "center" }}>
+              <Box sx={{ m: 3, width: "110px", display: "flex", justifyContent: "center" }}>
                 <Select
-                  sx={{ width: "250px" }}
+                  sx={{ width: "100%", height: "40px", transition: "all 0.3s ease" }}
                   fullWidth
                   value={selectedButton || ""}
                   onChange={(e) => setSelectedButton(e.target.value)}
                   displayEmpty
+                  renderValue={(selected) => {
+                    if (!selected) {
+                      return <span style={{ color: "#aaa" }}>Car Part</span>;
+                    }
+                    return selected;
+                  }}
                 >
                   <MenuItem value="" disabled>
-                    Select a Car Part
+                    Car Part
                   </MenuItem>
                   {buttons.map((button, index) => (
                     <MenuItem key={index} value={button.label}>
@@ -486,14 +543,16 @@ const Search: React.FC = () => {
                 </Select>
               </Box>
             ) : (
-              <Box sx={{ display: "flex", flexDirection: "column", "& button": { m: 1 } }}>
+              <Box sx={{ display: "flex", flexDirection: "column", "& button": { m: 1, transition: "all 0.3s ease" } }}>
                 <Box sx={{ display: "flex" }}>{renderButtons(1)}</Box>
                 <Box sx={{ display: "flex" }}>{renderButtons(2)}</Box>
                 <Box sx={{ display: "flex" }}>{renderButtons(3)}</Box>
               </Box>
             )}
           </div>
-          <div className="flex flex-wrap gap-3 justify-left">
+
+          {/* Search and Clear Buttons */}
+          <div className="flex flex-wrap gap-3 justify-start pl-40 w-full">
             <SmallIconButton type="submit">
               <Image src={smallsearch} alt="search" width={12} height={12} style={{ marginRight: "8px" }} />
               Search
@@ -527,16 +586,18 @@ const Search: React.FC = () => {
                 key={message.id}
                 className={`flex flex-col space-y-4 p-4 ${isAssistant ? "self-start" : "self-end"} max-w-2xl`}
               >
-                <div className={`${isAssistant ? "bg-blue-200" : "bg-gray-200"} rounded-lg p-6 text-sm`}>
-                  <h3 className={`${isAssistant ? "text-blue-700" : "text-gray-700"} font-semibold`}>
-                    {isAssistant ? "VeerAI" : "You"}
-                  </h3>
-                  {message.content.split("\n").map((currentTextBlock: string, index: number) => (
-                    <p key={message.id + index} className={`${isAssistant ? "text-blue-800" : "text-gray-800"}`}>
-                      {currentTextBlock || <>&nbsp;</>}
-                    </p>
-                  ))}
-                </div>
+                <Fade in={true} timeout={500}>
+                  <div className={`${isAssistant ? "bg-grey-10" : "bg-gray-200"} rounded-lg p-6 text-sm`}>
+                    <h3 className={`${isAssistant ? "text-gray-700" : "text-gray-700"} font-semibold`}>
+                      {isAssistant ? "VeerAI" : "You"}
+                    </h3>
+                    {message.content.split("\n").map((currentTextBlock: string, index: number) => (
+                      <p key={message.id + index} className={`${isAssistant ? "text-gray-800" : "text-gray-800"}`}>
+                        {currentTextBlock || <>&nbsp;</>}
+                      </p>
+                    ))}
+                  </div>
+                </Fade>
               </div>
             );
           })}
@@ -550,6 +611,8 @@ const Search: React.FC = () => {
             value={input}
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
+            disabled={isLoading}
+            style={{ transition: "all 0.3s ease" }}
           />
           <IconButton type="submit" className="ml-2">
             <Image src={search} alt="search" width={30} height={30} />
