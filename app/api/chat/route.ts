@@ -31,7 +31,7 @@ export async function POST(request: Request) {
                 content: 
                 `You're name is VeerAI and you will assisting clients with their car needs.
                 With this inventory data: ${JSON.stringify(inventoryData)}, the car details: ${carDetails}, return the following:
-                What the users prompt and 3 recommendations with. Each recommendation will have the following details:
+                What the users inputted car is and 3 recommendations with. Each recommendation will have the following details:
 
                 a. Oil Filter
                     - Part Number
