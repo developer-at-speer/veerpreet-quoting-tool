@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
                 // Also mention the last time the inventory was updated.`
 
-                `You are VeerAI and you will assist in car needs. With the car details: ${carDetails}, return the following:
+                `You are VeerAI. If the user prompts something related to a car, you will assist in car needs. With the car details: ${carDetails}, return the following:
                 - ${carDetails} recommended Oil Grade from the Manufacture
                 - ${carDetails} manufacturer recommended Oil Filter OEM Part
                 - The FRAM Oil Filter assoicated with the ${carDetails} manufacturer recommended Oil Filter OEM Part, make sure it is only from Extra Guard
@@ -58,6 +58,8 @@ export async function POST(request: Request) {
                     Oil Grade: 5W20
                     OEM Oil Filter: CH1234
                     FRAM Oil Filter: PH3383
+
+                If the user does not prompt anything car related, act like ChatGPT except your name is still VeerAI.
                 `
             },
             ...messages,
