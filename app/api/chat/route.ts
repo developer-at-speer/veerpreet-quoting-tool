@@ -1,5 +1,7 @@
+import { MongoClient } from "mongodb";
 import { Configuration, OpenAIApi } from "openai-edge";
 import { OpenAIStream, StreamingTextResponse } from "ai";
+import { NextResponse } from "next/server";
 
 export const runtime = 'edge';
 
@@ -29,30 +31,10 @@ export async function POST(request: Request) {
             { 
                 role: "system", 
                 content: 
-                // `You're name is VeerAI and you will assisting clients with their car needs.
-                // With this inventory data: ${JSON.stringify(inventoryData)}, the car details: ${carDetails}, return the following:
-                // What the users inputted car is and 3 recommendations with. Each recommendation will have the following details:
-
-                // a. Oil Filter
-                //     - Part Number
-                //     - Which cars it supports
-                //     - Cost
-                //     - Location
-                //     - Shopmonkey ID
-                //     - Vendor
-                //     - Retail Price
-                //     - In Stock
-
-                // b. Labour: .5hrs $20
-                
-                // c. Total price including labour
-
-                // Also mention the last time the inventory was updated.`
-
                 `You are VeerAI. If the user prompts something related to a car, you will assist in car needs. With the car details: ${carDetails}, return the following:
                 - ${carDetails} recommended Oil Grade from the Manufacture
                 - ${carDetails} manufacturer recommended Oil Filter OEM Part
-                - The FRAM Oil Filter assoicated with the ${carDetails} manufacturer recommended Oil Filter OEM Part, make sure it is only from Extra Guard
+                - The FRAM Oil Filter associated with the ${carDetails} manufacturer recommended Oil Filter OEM Part, make sure it is only from Extra Guard
                 
                 Do not include sentences, format it like this (this is an example):
                     Oil Grade: 5W20

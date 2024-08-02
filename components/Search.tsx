@@ -277,13 +277,19 @@ const Search: React.FC = () => {
 
   // Submits the users text inputs from the Car input field to the OpenAI Backend
   const submitForm = async () => {
-    const response = await fetch("/api/chat", {
+    const response = await fetch("/api/cars", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ messages, carDetails }),
+      body: JSON.stringify({ year, carMake, model, trim, engineSize }),
     });
+
+    if (response.ok) {
+      toast.success("Car details saved successfully");
+    } else {
+      toast.error("Failed to save car details");
+    }
 
     handleSubmit(new Event("submit"));
     setShouldSubmit(false);
