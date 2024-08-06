@@ -1,4 +1,4 @@
-// project/app/api/mongo/route.ts
+// project/app/api/test/route.ts
 import { MongoClient } from "mongodb";
 import { NextResponse } from "next/server";
 

@@ -275,8 +275,9 @@ const Search: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Submits the users text inputs from the Car input field to the OpenAI Backend
+  // Submits the users text inputs from the Car input field to the OpenAI Backend + MongoDB Backend
   const submitForm = async () => {
+    // Sending POST Request to MongoDB for car details
     const response = await fetch("/api/cars", {
       method: "POST",
       headers: {
@@ -291,6 +292,7 @@ const Search: React.FC = () => {
       toast.error("Failed to save car details");
     }
 
+    // Submits it to the OpenAI API
     handleSubmit(new Event("submit"));
     setShouldSubmit(false);
   };
