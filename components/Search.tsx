@@ -19,197 +19,100 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Collapse from "@mui/material/Collapse";
 import Fade from "@mui/material/Fade";
 import Grow from "@mui/material/Grow";
+import { useChatContext } from "./ChatContext";
 
 // Proxy Server for CarAPI
 const BASE_URL = "https://vpsc-carapi.onrender.com/api";
 
 const Search: React.FC = () => {
+  // Destructuring fetchCarDetails and selectedCarDetail from the ChatContext.tsx
+  const { fetchCarDetails, selectedCarDetail } = useChatContext();
+
   // State variables
-  // Store error message that may occur during API fetch. Loading indicates whether data is being fetched.
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  //Gets the lists of different makes, model, trims, and engine sizes. Stores it inside array.
   const [carMakes, setCarMakes] = useState<{ id: number; name: string }[]>([]);
   const [carModels, setCarModels] = useState<{ id: number; name: string }[]>([]);
   const [carTrims, setCarTrims] = useState<{ id: number; name: string; description: string }[]>([]);
   const [carEngineSizes, setCarEngineSizes] = useState<{ id: number; size: number }[]>([]);
   const [page, setPage] = useState(0);
-
-  // References the text inputs. Prompts user to input the next text input.
   const yearInputRef = useRef<HTMLInputElement>(null);
   const makeInputRef = useRef<HTMLInputElement>(null);
   const modelInputRef = useRef<HTMLInputElement>(null);
   const trimInputRef = useRef<HTMLInputElement>(null);
   const engineSizeInputRef = useRef<HTMLInputElement>(null);
-
   const abortControllerRef = useRef<AbortController | null>(null);
-
-  // Stores the users selected inputs
   const [carMake, setCarMake] = useState<string>("");
   const [model, setModel] = useState<string>("");
   const [year, setYear] = useState<string>("");
   const [trim, setTrim] = useState<string>("");
   const [engineSize, setEngineSize] = useState<string>("");
   const [selectedButton, setSelectedButton] = useState<string | null>(null);
-
-  // Indicates when the form (car inputs) should be submitted
   const [shouldSubmit, setShouldSubmit] = useState<boolean>(false);
-
-  // Hooks to manage chat inputs
   const { input, handleInputChange, handleSubmit, messages, setInput } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
   const isSmallScreen = useMediaQuery("(max-width:1440px)");
   const isBigScreen = useMediaQuery("(min-width:1520px)");
-
   const years = Array.from({ length: 2024 - 1950 + 1 }, (_, index) => (1950 + index).toString());
-
-  // const carDetails = `${selectedButton} for ${year} ${carMake} ${model} ${trim} ${engineSize}`;
-
+  const [isCarDetailSet, setIsCarDetailSet] = useState<boolean>(false); // State variable, setting all the states to false
   const carDetails = `${year} ${carMake} ${model} ${trim} ${engineSize}`;
 
-  // Fetches car makes from CarAPI
-  useEffect(() => {
-    const fetchPosts = async () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+  // Fetches data from the API and sets the data in the state
+  const fetchData = async (endpoint: string, setData: (data: any) => void) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(endpoint, { signal: abortControllerRef.current.signal });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-
-      abortControllerRef.current = new AbortController();
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch(`${BASE_URL}/makes`, {
-          signal: abortControllerRef.current.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Fetched data:", data);
-
-        if (data && Array.isArray(data.data)) {
-          setCarMakes(data.data);
-        } else {
-          throw new Error("Fetched data does not contain an array in 'data' property");
-        }
-      } catch (e: any) {
-        if (e.name === "AbortError") {
-          console.log("Fetch aborted");
-          return;
-        }
-
+      const data = await response.json();
+      if (data && Array.isArray(data.data)) {
+        setData(data.data);
+      } else {
+        throw new Error("Fetched data does not contain an array in 'data' property");
+      }
+    } catch (e: any) {
+      if (e.name !== "AbortError") {
         console.error("Fetch error:", e);
         setError(e.message || "Something went wrong");
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchPosts();
-
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
+  // Initial fetch for car makes
+  useEffect(() => {
+    fetchData(`${BASE_URL}/makes`, setCarMakes);
   }, [page]);
 
-  // Fetches car models from CarAPI. useEffect is the hook used since it manages the lifecycle of a fetch request to the car makes API endpoint.
+  // Fetch car models based on selected make and year
   useEffect(() => {
-    const fetchCarModels = async () => {
-      if (carMake && year) {
-        setIsLoading(true); // Indicates data is being fetched
-        try {
-          const response = await fetch(`${BASE_URL}/models?year=${year}&make=${carMake}`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("Fetched models data:", data);
+    if (carMake && year) {
+      fetchData(`${BASE_URL}/models?year=${year}&make=${carMake}`, setCarModels);
+    }
+  }, [carMake, year]);
 
-          if (data && Array.isArray(data.data)) {
-            setCarModels(data.data);
-          } else {
-            throw new Error("Fetched data does not contain an array in 'data' property");
-          }
-        } catch (e: any) {
-          console.error("Fetch error:", e);
-          setError(e.message || "Something went wrong");
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchCarModels();
-  }, [carMake, year]); //Dependencies, only performed if all dependencies been set
-
-  // Fetches car trims from CarAPI
+  // Fetch car trims based on selected make, year, and model
   useEffect(() => {
-    const fetchCarTrims = async () => {
-      if (carMake && year && model) {
-        setIsLoading(true);
-        try {
-          const response = await fetch(`${BASE_URL}/trims?year=${year}&make=${carMake}&model=${model}`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("Fetched trims data:", data);
-
-          if (data && Array.isArray(data.data)) {
-            setCarTrims(data.data);
-          } else {
-            throw new Error("Fetched data does not contain an array in 'data' property");
-          }
-        } catch (e: any) {
-          console.error("Fetch error:", e);
-          setError(e.message || "Something went wrong");
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchCarTrims();
+    if (carMake && year && model) {
+      fetchData(`${BASE_URL}/trims?year=${year}&make=${carMake}&model=${model}`, setCarTrims);
+    }
   }, [carMake, year, model]);
 
-  // Fetches car engines for specific trim and model
+  // Fetch engine sizes based on selected make, year, model, and trim
   useEffect(() => {
-    const fetchEngineSizes = async () => {
-      if (carMake && year && model && trim) {
-        setIsLoading(true);
-        try {
-          const response = await fetch(`${BASE_URL}/engines?year=${year}&make=${carMake}&model=${model}&trim=${trim}`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("Fetched engines data:", data);
-
-          if (data && Array.isArray(data.data)) {
-            setCarEngineSizes(data.data);
-          } else {
-            throw new Error("Fetched data does not contain an array in 'data' property");
-          }
-        } catch (e: any) {
-          console.error("Fetch error:", e);
-          setError(e.message || "Something went wrong");
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchEngineSizes();
+    if (carMake && year && model && trim) {
+      fetchData(`${BASE_URL}/engines?year=${year}&make=${carMake}&model=${model}&trim=${trim}`, setCarEngineSizes);
+    }
   }, [carMake, year, model, trim]);
 
-  // Function to handle button click for car parts
+  // Handles button click for car part selection
   const handleButtonClick = (buttonLabel: string) => {
     setSelectedButton(buttonLabel);
   };
@@ -230,6 +133,7 @@ const Search: React.FC = () => {
     { label: "A/C Refill", group: 3 },
   ];
 
+  // Styled icon button
   const SmallIconButton = styled(IconButton)({
     fontSize: "1rem",
     padding: "0.5rem",
@@ -239,7 +143,7 @@ const Search: React.FC = () => {
     },
   });
 
-  // Handles the buttons for car part selection
+  // Renders the car part buttons
   const renderButtons = (group: number) => {
     return buttons
       .filter((button) => button.group === group)
@@ -265,31 +169,69 @@ const Search: React.FC = () => {
       ));
   };
 
-  // Animation to scroll to bottom of the chat log
+  // Scrolls to the bottom of the chat log
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
-  React.useEffect(() => {
+
+  useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Submits the users text inputs from the Car input field to the OpenAI Backend
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+
+  // Submits the form and saves car details
   const submitForm = async () => {
-    const response = await fetch("/api/chat", {
+    const response = await fetch("/api/cars", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ messages, carDetails }),
+      body: JSON.stringify({ year, carMake, model, trim, engineSize }),
     });
 
-    handleSubmit(new Event("submit"));
+    if (response.ok) {
+      toast.success("Car details saved successfully");
+    } else {
+      toast.error("Failed to save car details");
+    }
+
+    await handleSubmit(new Event("submit"));
+    setIsFormSubmitted(true);
     setShouldSubmit(false);
+
+    // Call fetchCarDetails to update Sidebar
+    fetchCarDetails();
   };
 
-  React.useEffect(() => {
+  // Save messages to database after form submission
+  // useEffect(() => {
+  //   const saveMessages = async () => {
+  //     if (isFormSubmitted) {
+  //       const messagesResponse = await fetch("/api/messages", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(messages),
+  //       });
+
+  //       if (messagesResponse.ok) {
+  //         toast.success("Messages saved successfully");
+  //       } else {
+  //         toast.error("Failed to save messages");
+  //       }
+
+  //       setIsFormSubmitted(false);
+  //     }
+  //   };
+
+  //   saveMessages();
+  // }, [isFormSubmitted, messages]);
+
+  useEffect(() => {
     if (shouldSubmit) {
       submitForm();
     }
@@ -313,6 +255,37 @@ const Search: React.FC = () => {
       handleSubmit(new Event("submit"));
     }
   };
+
+  useEffect(() => {
+    const handleCarDetailsSelected = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const carDetails = customEvent.detail;
+      setInput(carDetails);
+      handleSubmit(new Event("submit"));
+    };
+
+    window.addEventListener("carDetailsSelected", handleCarDetailsSelected as EventListener);
+
+    return () => {
+      window.removeEventListener("carDetailsSelected", handleCarDetailsSelected as EventListener);
+    };
+  }, [handleSubmit, setInput]);
+
+// Sets the input field and sets the state variable to true once input is set
+useEffect(() => {
+  if (selectedCarDetail) {
+    setInput(selectedCarDetail);
+    setIsCarDetailSet(true); // Set the state to true
+  }
+}, [selectedCarDetail, setInput]);
+
+// Submits the form once the input field is updated with the car detail
+useEffect(() => {
+  if (isCarDetailSet) {
+    handleSubmit(new Event("submit"));
+    setIsCarDetailSet(false); // Reset the state variable
+  }
+}, [isCarDetailSet, handleSubmit]);
 
   return (
     <div className="min-h-[100vh] flex flex-col">
@@ -404,22 +377,22 @@ const Search: React.FC = () => {
                   options={carModels.map((m) => m.name)} // Fetches options from API
                   value={model} // Store in variable called model
                   onChange={(event, newValue) => {
-                    setModel(newValue || ""); // Ensures the model starts off as an empty string, then keeps the state in sync with user 
-                    
+                    setModel(newValue || ""); // Ensures the model starts off as an empty string, then keeps the state in sync with user input
+
                     // Clears the rest of the values to the left if model is cleared
                     if (!newValue) {
                       setTrim("");
                       setEngineSize("");
-                    } 
-                    
+                    }
+
                     // Condition that checks if a car model from the options matches the users input
                     if (carModels.some((m) => m.name === newValue)) {
-                      trimInputRef.current?.focus(); // If the condition is true, shifts to the nexts text input
+                      trimInputRef.current?.focus(); // If the condition is true, shifts to the next text input
                     }
                   }}
                   inputValue={model} // Value displayed in the input field
-                  
-                  // Function that is called whenver the value of the input field is changed
+
+                  // Function that is called whenever the value of the input field is changed
                   onInputChange={(event, newInputValue) => {
                     setModel(newInputValue); // Setter function for the model variable
                     if (!newInputValue) {
@@ -433,7 +406,7 @@ const Search: React.FC = () => {
                     // Checks if there is a car model that matches the users input
                     if (matchingModels.length === 1) { // Checks if the users input value matches with exactly one car model
                       setModel(matchingModels[0].name); // Sets the model to the one matching model
-                      trimInputRef.current?.focus(); // If the condition is true, shifts to the nexts text input
+                      trimInputRef.current?.focus(); // If the condition is true, shifts to the next text input
                     }
                   }}
                   renderInput={(params) => (
@@ -512,6 +485,13 @@ const Search: React.FC = () => {
                       inputRef={engineSizeInputRef}
                     />
                   )}
+                />
+
+                <TextField
+                  helperText = "(Optional)"
+                  label ="Vin"
+                  size = "small"
+                  style={{ margin: "0.5rem", width: "14ch", transition: "all 0.3s ease" }}
                 />
               </div>
             </div>
