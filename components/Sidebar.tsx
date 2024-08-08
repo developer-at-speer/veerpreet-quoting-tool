@@ -8,9 +8,12 @@ import Image from "next/image";
 import { useChatContext } from './ChatContext';
 
 const Sidebar: React.FC = () => {
-  const { chats, setChats, fetchCarDetails } = useChatContext();
+  // The useChatContext hook is importing and accessing the context created in your ChatContext file, which provides the chats, setChats, fetchCarDetails, selectedCarDetail, and setSelectedCarDetail values to the Sidebar component from MongoDB
+  const { chats, setChats, fetchCarDetails, setSelectedCarDetail } = useChatContext();
+
   const [activeChat, setActiveChat] = useState<string | null>(null);
 
+  // Function is not fully working, used to clear/refresh chat 
   const startNewChat = async () => {
     try {
       setChats([]);
@@ -19,18 +22,25 @@ const Sidebar: React.FC = () => {
       console.error("Error starting new chat:", error);
     }
   };
-
+ 
+  // Function used to call MongoDB to delete a car from the database
   const deleteChat = async (chat: string) => {
-    const match = chat.match(/^(\d{4})\s+(\w+)\s+([\w\s]+)\s+([\w\s]+)\s+([\d.]+ L)$/);
+    // Extracts specific parts from the car details
+    const match = chat.match(/^(\d{4})\s+(\w+)\s+([\w\s]+?)\s+([\d.]+ L)$/); // Year + Make + Model + Trim + Engine Size
 
+    // Sees if it matches up with the format
     if (!match) {
       console.error("Invalid chat format:", chat);
       return;
     }
 
-    const [, year, carMake, model, trim, engineSize] = match;
-    const carDetails = { carMake, model, year, trim, engineSize };
+    const [, year, carMake, modelAndTrim, engineSize] = match;
+    const [model, ...trimParts] = modelAndTrim.split(' ');
+    const trim = trimParts.join(' ');
 
+    const carDetails = { carMake, model, year, trim, engineSize };
+ 
+    // API Call to delete car
     try {
       const response = await fetch('/api/cars', {
         method: 'DELETE',
@@ -58,7 +68,8 @@ const Sidebar: React.FC = () => {
       console.error("Error deleting car:", error);
     }
   };
-
+ 
+  // Function to send car to API to retrive chat history of car
   const sendCarDetailsToAI = async (carDetails: string) => {
     try {
       const response = await fetch('/api/chat', {
@@ -90,23 +101,26 @@ const Sidebar: React.FC = () => {
         </IconButton>
       </div>
       <div className={styles.chatList}>
+        {/* Renders the different cars from MongoDB using ChatContext.tsx */}
+        {/* Using ChatContext which allows componets to access the data from MongoDB, it fetches data from the DB and chats holds the list of the car details, which is rendered to the frontend. */}
         {chats.map((chat, index) => (
           <div key={index} className={styles.chatContainer}>
             <div
               className={`${styles.chatItem} ${chat === activeChat ? styles.activeChat : ''}`}
               onClick={() => {
                 setActiveChat(chat);
+                setSelectedCarDetail(chat); // Set the selected car detail in the context
                 sendCarDetailsToAI(chat);
               }}
             >
-              {chat}
+              <span className={styles.chatText}>{chat}</span>
+              <IconButton
+                className={styles.deleteButton}
+                onClick={() => deleteChat(chat)}
+              >
+                <Image src={deleteIcon} alt="delete" width={24} height={24} />
+              </IconButton>
             </div>
-            <IconButton
-              className={styles.deleteButton}
-              onClick={() => deleteChat(chat)}
-            >
-              <Image src={deleteIcon} alt="delete" width={24} height={24} />
-            </IconButton>
           </div>
         ))}
       </div>

@@ -24,8 +24,10 @@
 .chatItem {
   padding: 1rem;
   cursor: pointer;
+  display: flex;
 }
 
 .activeChat {
   background-color: #e0e0e0;
 }
+

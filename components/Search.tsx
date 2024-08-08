@@ -25,8 +25,8 @@ import { useChatContext } from "./ChatContext";
 const BASE_URL = "https://vpsc-carapi.onrender.com/api";
 
 const Search: React.FC = () => {
-  // Destructuring fetchCarDetails from the context
-  const { fetchCarDetails } = useChatContext();
+  // Destructuring fetchCarDetails and selectedCarDetail from the ChatContext.tsx
+  const { fetchCarDetails, selectedCarDetail } = useChatContext();
 
   // State variables
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +54,7 @@ const Search: React.FC = () => {
   const isSmallScreen = useMediaQuery("(max-width:1440px)");
   const isBigScreen = useMediaQuery("(min-width:1520px)");
   const years = Array.from({ length: 2024 - 1950 + 1 }, (_, index) => (1950 + index).toString());
+  const [isCarDetailSet, setIsCarDetailSet] = useState<boolean>(false); // State variable, setting all the states to false
   const carDetails = `${year} ${carMake} ${model} ${trim} ${engineSize}`;
 
   // Fetches data from the API and sets the data in the state
@@ -270,6 +271,22 @@ const Search: React.FC = () => {
     };
   }, [handleSubmit, setInput]);
 
+// Sets the input field and sets the state variable to true once input is set
+useEffect(() => {
+  if (selectedCarDetail) {
+    setInput(selectedCarDetail);
+    setIsCarDetailSet(true); // Set the state to true
+  }
+}, [selectedCarDetail, setInput]);
+
+// Submits the form once the input field is updated with the car detail
+useEffect(() => {
+  if (isCarDetailSet) {
+    handleSubmit(new Event("submit"));
+    setIsCarDetailSet(false); // Reset the state variable
+  }
+}, [isCarDetailSet, handleSubmit]);
+
   return (
     <div className="min-h-[100vh] flex flex-col">
       <Toaster />
@@ -468,6 +485,13 @@ const Search: React.FC = () => {
                       inputRef={engineSizeInputRef}
                     />
                   )}
+                />
+
+                <TextField
+                  helperText = "(Optional)"
+                  label ="Vin"
+                  size = "small"
+                  style={{ margin: "0.5rem", width: "14ch", transition: "all 0.3s ease" }}
                 />
               </div>
             </div>

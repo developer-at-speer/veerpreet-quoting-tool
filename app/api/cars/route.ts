@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 const uri = process.env.MONGODB_URI as string;
 const client = new MongoClient(uri);
 
+// Connects to the database
 async function connectToDatabase() {
   try {
     await client.connect();
